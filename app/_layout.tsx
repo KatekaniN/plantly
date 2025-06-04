@@ -4,7 +4,8 @@ export default function Layout() {
     return (
         <Tabs
             screenOptions={{
-                sceneStyle: { backgroundColor: "#f335ad" },
+                sceneStyle: { paddingTop: 8, paddingBottom: 8 },
+                tabBarActiveTintColor: "#fa7acb",
             }}>
             <Tabs.Screen
                 name="index"
