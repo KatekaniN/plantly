@@ -1,6 +1,4 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-
 
 type UserStore = {
     hasFinishedOnboarding: boolean;
@@ -8,5 +6,11 @@ type UserStore = {
 }
 
 export const useUserStore = create<UserStore>((set) => ({
-
+    hasFinishedOnboarding: false,
+    toggleHasOnboarded: ()=> set((state)=>{
+        return {
+            ...state,
+            hasFinishedOnboarding: !state.hasFinishedOnboarding
+        }
+    })
 }))
