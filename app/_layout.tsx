@@ -1,16 +1,15 @@
-import { Stack } from "expo-router";
+import { Tabs } from "expo-router";
 
 export default function Layout() {
     return (
-        <Stack
+        <Tabs
             screenOptions={{
-                headerShown: false,
-                contentStyle: { backgroundColor: "#fff" },
+                sceneStyle: { backgroundColor: "#f335ad" },
             }}>
-            <Stack.Screen
+            <Tabs.Screen
                 name="index"
                 options={{ title: "Home" }}>
-            </Stack.Screen>
-        </Stack>
+            </Tabs.Screen>
+        </Tabs>
     );
 }
