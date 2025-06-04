@@ -8,7 +8,7 @@ export default function Layout() {
             screenOptions={{
                 sceneStyle: { paddingTop: 8, paddingBottom: 8 },
                 tabBarActiveTintColor: "#fa7acb",
-                tabBarInactiveTintColor: "#eee",
+                tabBarInactiveTintColor: "#948e8e",
                 tabBarShowLabel: false,
             }}>
             <Tabs.Screen
