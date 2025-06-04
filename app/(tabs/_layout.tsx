@@ -23,6 +23,7 @@ export default function Layout() {
             <Tabs.Screen
                 name="index"
                 options={{
+                    headerShown: false,
                     title: "Home",
                     tabBarIcon: ({ size, color }) => (
                         <Entypo name="leaf" size={size} color={color} />

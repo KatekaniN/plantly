@@ -12,7 +12,7 @@ export default function OnboardingScreen() {
         toggleHasOnboarded();
         router.replace("/");
     }
-    
+
     return (
         <View style={styles.container}>
             <Button
