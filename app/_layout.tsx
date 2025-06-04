@@ -1,35 +1,23 @@
-import { Tabs } from "expo-router";
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { theme } from "../themes/theme";
-import Entypo from '@expo/vector-icons/Entypo';
+import { View, Text } from 'react-native'
+import React from 'react'
+import { Stack } from 'expo-router'
 
 export default function Layout() {
     return (
-        <Tabs
+        <Stack
             screenOptions={{
-                sceneStyle: { paddingTop: 8, paddingBottom: 8 },
-                tabBarActiveTintColor: theme.colorGreen,
-                tabBarInactiveTintColor: theme.colorGrey,
-                tabBarShowLabel: false,
+                headerShown: false,
+                contentStyle: { backgroundColor: '#fff' },
             }}>
-            <Tabs.Screen
-                name="index"
+            <Stack.Screen
+                name="(tabs)"
                 options={{
-                    title: "Home",
-                    tabBarIcon: ({ size, color }) => (
-                        <Entypo name="leaf" size={size} color={color} />
-                    )
+                    headerShown: false,
                 }}>
-            </Tabs.Screen>
-            <Tabs.Screen
-                name="profile"
-                options={{
-                    title: "Profile",
-                    tabBarIcon: ({ size, color }) => (
-                        <MaterialIcons name="account-circle" size={size} color={color} />
-                    )
-                }}>
-            </Tabs.Screen>
-        </Tabs>
-    );
+            </Stack.Screen>
+            <Stack.Screen
+                name="onboarding">
+            </Stack.Screen>
+        </Stack>
+    )
 }
