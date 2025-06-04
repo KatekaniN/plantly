@@ -4,11 +4,7 @@ import { Stack } from 'expo-router'
 
 export default function Layout() {
     return (
-        <Stack
-            screenOptions={{
-                headerShown: false,
-                contentStyle: { backgroundColor: '#fff' },
-            }}>
+        <Stack>
             <Stack.Screen
                 name="(tabs)"
                 options={{
@@ -16,7 +12,12 @@ export default function Layout() {
                 }}>
             </Stack.Screen>
             <Stack.Screen
-                name="onboarding">
+                name="onboarding"
+                options={{
+                    headerShown: false,
+                    title: 'Onboarding',
+                    presentation: 'modal',
+                }}>
             </Stack.Screen>
         </Stack>
     )
