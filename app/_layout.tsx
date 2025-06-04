@@ -1,14 +1,15 @@
 import { Tabs } from "expo-router";
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { theme } from "../themes/theme";
+import Entypo from '@expo/vector-icons/Entypo';
 
 export default function Layout() {
     return (
         <Tabs
             screenOptions={{
                 sceneStyle: { paddingTop: 8, paddingBottom: 8 },
-                tabBarActiveTintColor: "#fa7acb",
-                tabBarInactiveTintColor: "#948e8e",
+                tabBarActiveTintColor: theme.colorGreen,
+                tabBarInactiveTintColor: theme.colorGrey,
                 tabBarShowLabel: false,
             }}>
             <Tabs.Screen
@@ -16,7 +17,7 @@ export default function Layout() {
                 options={{
                     title: "Home",
                     tabBarIcon: ({ size, color }) => (
-                        <FontAwesome name="home" size={size} color={color} />
+                        <Entypo name="leaf" size={size} color={color} />
                     )
                 }}>
             </Tabs.Screen>

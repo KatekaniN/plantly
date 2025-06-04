@@ -21,7 +21,8 @@
     "react-native-screens": "~4.11.1",
     "expo-linking": "~7.1.5",
     "expo-constants": "~17.1.6",
-    "react-dom": "19.0.0"
+    "react-dom": "19.0.0",
+    "@expo/vector-icons": "^14.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
