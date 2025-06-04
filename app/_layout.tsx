@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { theme } from "../themes/theme";
 import Entypo from '@expo/vector-icons/Entypo';
 
@@ -26,7 +26,7 @@ export default function Layout() {
                 options={{
                     title: "Profile",
                     tabBarIcon: ({ size, color }) => (
-                        <MaterialIcons name="account-circle" size={size} color={color} />
+                        <MaterialCommunityIcons name="flower-outline" size={size} color={color} />
                     )
                 }}>
             </Tabs.Screen>
