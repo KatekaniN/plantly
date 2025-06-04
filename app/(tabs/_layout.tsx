@@ -2,8 +2,9 @@ import { Redirect, Tabs } from "expo-router";
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { theme } from "@/theme";
 import Entypo from '@expo/vector-icons/Entypo';
+import { useUserStore } from "@/store/userStore";
 
-const hasFinishedOnboarding = false;
+const hasFinishedOnboarding = useUserStore((state) => state.hasFinishedOnboarding);
 
 export default function Layout() {
     // Check if the user has completed the onboarding process
