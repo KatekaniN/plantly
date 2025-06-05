@@ -4,7 +4,7 @@ import FontAwesome6 from '@expo/vector-icons/FontAwesome5';
 import Animated, {
     useSharedValue,
     useAnimatedStyle,
-    withSpring,
+    withSpring
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { FontAwesome6 as FontAwesome6Type } from '@expo/vector-icons';
@@ -20,13 +20,13 @@ export function PlantlyButton({ title, onPress, icon = "leaf" }: Props) {
     // Create a shared value for the scale animation
     const scale = useSharedValue(1);
 
-    // Create an animated style using Reanimated 3 syntax
+    // Create an animated style for the button wrapper
     const animatedStyle = useAnimatedStyle(() => ({
         transform: [{ scale: scale.value }]
     }));
 
+    // Handler functions
     const handlePressIn = () => {
-        // Scale down to 90% with a spring animation for a more natural feel
         scale.value = withSpring(0.9, {
             damping: 15,
             stiffness: 120,
@@ -35,7 +35,6 @@ export function PlantlyButton({ title, onPress, icon = "leaf" }: Props) {
     };
 
     const handlePressOut = () => {
-        // Scale back to original size with a spring animation
         scale.value = withSpring(1, {
             damping: 15,
             stiffness: 120,
@@ -51,26 +50,35 @@ export function PlantlyButton({ title, onPress, icon = "leaf" }: Props) {
     };
 
     return (
-        <Pressable
-            onPressIn={handlePressIn}
-            onPressOut={handlePressOut}
-            onPress={hapticOnPress}
-            style={({ pressed }) => pressed ? [styles.button, styles.buttonPressed] : styles.button}
-        >
-            <Animated.View style={[styles.contentContainer, animatedStyle]}>
-                <Text style={styles.text}>{title}</Text>
-                <FontAwesome6
-                    name={icon}
-                    size={20}
-                    color="white"
-                    style={styles.icon}
-                />
-            </Animated.View>
-        </Pressable>
+        <Animated.View style={[styles.buttonWrapper, animatedStyle]}>
+            <Pressable
+                onPressIn={handlePressIn}
+                onPressOut={handlePressOut}
+                onPress={hapticOnPress}
+                style={({ pressed }) => [
+                    styles.button,
+                    pressed && styles.buttonPressed
+                ]}
+            >
+                <View style={styles.contentContainer}>
+                    <Text style={styles.text}>{title}</Text>
+                    <FontAwesome6
+                        name={icon}
+                        size={20}
+                        color="white"
+                        style={styles.icon}
+                    />
+                </View>
+            </Pressable>
+        </Animated.View>
     );
 }
 
 const styles = StyleSheet.create({
+    buttonWrapper: {
+        // This wrapper will handle the scale animation
+        alignSelf: 'center',  // This helps with proper scaling
+    },
     text: {
         color: theme.colorWhite,
         fontSize: 18,
@@ -81,13 +89,12 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         borderRadius: 6,
         backgroundColor: theme.colorGreen,
-        overflow: 'hidden', 
+        overflow: 'hidden',
     },
     contentContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        width: '100%',
     },
     icon: {
         marginLeft: 6,
