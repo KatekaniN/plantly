@@ -1,5 +1,5 @@
 import { theme } from "@/theme";
-import { StyleSheet, Text, Pressable } from "react-native";
+import { StyleSheet, Text, Pressable, View } from "react-native";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 type Props = {
@@ -10,11 +10,15 @@ type Props = {
 export function PlantlyButton({ title, onPress }: Props) {
     return (
         <Pressable onPress={onPress} style={styles.button}>
-            <Text style={styles.text}>{title}
-                <Text style={styles.iconSpacing}>
-                    <MaterialCommunityIcons name="leaf" size={24} color="white" />
-                </Text>
-            </Text>
+            <View style={styles.contentContainer}>
+                <Text style={styles.text}>{title}</Text>
+                <MaterialCommunityIcons
+                    name="leaf"
+                    size={24}
+                    color="white"
+                    style={styles.icon}
+                />
+            </View>
         </Pressable>
     );
 }
@@ -31,7 +35,12 @@ const styles = StyleSheet.create({
         borderRadius: 6,
         backgroundColor: theme.colorGreen,
     },
-    iconSpacing: {
-        marginLeft: 8, // Adjust this value for more or less spacing
+    contentContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    icon: {
+        marginLeft: 10, // Adjust this value to increase or decrease spacing
     }
 });
