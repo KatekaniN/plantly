@@ -1,19 +1,21 @@
 import { theme } from "@/theme";
 import { StyleSheet, Text, Pressable, View } from "react-native";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { MaterialCommunityIcons as MaterialCommunityIconsType } from '@expo/vector-icons';
 
 type Props = {
     title: string;
+    icon?: React.ComponentProps<typeof MaterialCommunityIconsType>['name'];
     onPress: () => void;
 };
 
-export function PlantlyButton({ title, onPress }: Props) {
+export function PlantlyButton({ title, onPress, icon = "leaf" }: Props) {
     return (
         <Pressable onPress={onPress} style={styles.button}>
             <View style={styles.contentContainer}>
                 <Text style={styles.text}>{title}</Text>
                 <MaterialCommunityIcons
-                    name="leaf"
+                    name={icon}
                     size={28}
                     color="white"
                     style={styles.icon}
