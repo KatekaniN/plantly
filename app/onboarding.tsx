@@ -3,6 +3,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { PlantlyButton } from "@/components/PlantlyButton";
 import { theme } from "@/theme";
 import { useRouter } from "expo-router";
+import { Image } from "expo-image";
 import { useUserStore } from "@/store/userStore";
 import { View } from "react-native-reanimated/lib/typescript/Animated";
 import { StatusBar } from "expo-status-bar";
@@ -19,12 +20,16 @@ export default function OnboardingScreen() {
 
     return (
         <LinearGradient
-            colors={[theme.colorAppleGreen, theme.colorLimeGreen, theme.colorGreen]}
+            colors={[theme.colorBeige, theme.colorAppleGreen, theme.colorLimeGreen, theme.colorGreen]}
             style={styles.container}>
             <StatusBar style="light" />
             <Text style={styles.headerText}>
                 Welcome to Plantly!
             </Text>
+            <Image
+                style={styles.image}
+                source={require('@/assets/images/logo1.png')}
+            />
             <PlantlyButton
                 title="Go Water My Plants"
                 onPress={handlePress} />
@@ -46,8 +51,19 @@ const styles = StyleSheet.create({
     headerText: {
         fontSize: 32,
         fontWeight: "bold",
+        top: 20,
         marginBottom: 20,
         textAlign: "center",
-        color: theme.colorAppleGreen,
+        color: theme.colorWhite,
+    },
+    image: {
+        width: 200,
+        height: '100%',
+        marginBottom: 20,
+        borderRadius: 8,
+        borderWidth: 2,
+        borderColor: theme.colorWhite,
+        flex: 1,
+        alignSelf: "center",
     }
 });
