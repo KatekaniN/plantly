@@ -1,6 +1,7 @@
 import { theme } from "@/theme";
-import { StyleSheet, Text, Pressable, View } from "react-native";
+import { StyleSheet, Text, Pressable, View, Platform } from "react-native";
 import FontAwesome6 from '@expo/vector-icons/FontAwesome5';
+import * as Haptics from 'expo-haptics';
 import { FontAwesome6 as FontAwesome6Type } from '@expo/vector-icons';
 
 type Props = {
@@ -10,8 +11,21 @@ type Props = {
 };
 
 export function PlantlyButton({ title, onPress, icon = "leaf" }: Props) {
+
+    const hapticOnPress = () => {
+        if (Platform.OS === 'ios' || Platform.OS === 'android') {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }
+        onPress();
+    }
+
     return (
-        <Pressable onPress={onPress} style={styles.button}>
+        <Pressable onPress={hapticOnPress} style={({ pressed }) => {
+            if (pressed) {
+                return [styles.button, styles.buttonPressed];
+            }
+            return styles.button;
+        }}>
             <View style={styles.contentContainer}>
                 <Text style={styles.text}>{title}</Text>
                 <FontAwesome6
@@ -27,7 +41,7 @@ export function PlantlyButton({ title, onPress, icon = "leaf" }: Props) {
 
 const styles = StyleSheet.create({
     text: {
-        color: "white",
+        color: theme.colorWhite,
         fontSize: 18,
         fontWeight: "bold",
     },
@@ -44,5 +58,8 @@ const styles = StyleSheet.create({
     },
     icon: {
         marginLeft: 6,
+    },
+    buttonPressed: {
+        backgroundColor: theme.colorLeafyGreen
     }
 });
