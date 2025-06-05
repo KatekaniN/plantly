@@ -20,6 +20,7 @@ export function PlantlyButton({ title, onPress }: Props) {
 const styles = StyleSheet.create({
     text: {
         color: "white",
+        justifyContent: "space-between",
         fontSize: 18,
         fontWeight: "bold",
     },
