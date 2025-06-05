@@ -30,7 +30,7 @@ export function PlantlyButton({ title, onPress, icon = "leaf" }: Props) {
                 <Text style={styles.text}>{title}</Text>
                 <FontAwesome6
                     name={icon}
-                    size={28}
+                    size={24}
                     color="white"
                     style={styles.icon}
                 />
