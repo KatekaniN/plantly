@@ -14,7 +14,7 @@ export function PlantlyButton({ title, onPress }: Props) {
                 <Text style={styles.text}>{title}</Text>
                 <MaterialCommunityIcons
                     name="watering-can"
-                    size={32}
+                    size={28}
                     color="white"
                     style={styles.icon}
                 />
@@ -26,7 +26,7 @@ export function PlantlyButton({ title, onPress }: Props) {
 const styles = StyleSheet.create({
     text: {
         color: "white",
-        fontSize: 18,
+        fontSize: 22,
         fontWeight: "bold",
     },
     button: {
