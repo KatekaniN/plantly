@@ -1,5 +1,6 @@
 import { StyleSheet, Text } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { useWindowDimensions } from "react-native";
 import { PlantlyButton } from "@/components/PlantlyButton";
 import { theme } from "@/theme";
 import { useRouter } from "expo-router";
@@ -9,6 +10,9 @@ import { View } from "react-native-reanimated/lib/typescript/Animated";
 import { StatusBar } from "expo-status-bar";
 
 export default function OnboardingScreen() {
+    const { width } = useWindowDimensions();
+
+    const imageSize = Math.min(width / 1.5, 400);
 
     const router = useRouter()
     const toggleHasOnboarded = useUserStore(state => state.toggleHasOnboarded);
@@ -27,7 +31,7 @@ export default function OnboardingScreen() {
                 Welcome to Plantly!
             </Text>
             <Image
-                style={styles.image}
+                style={[styles.image, { width: imageSize, height: imageSize }]}
                 source={require('@/assets/images/logo1.png')}
             />
             <PlantlyButton
@@ -57,8 +61,6 @@ const styles = StyleSheet.create({
         color: theme.colorWhite,
     },
     image: {
-        width: 250,
-        height: 250,
         marginBottom: 20,
         borderRadius: 8,
         borderWidth: 2,
