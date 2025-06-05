@@ -1,18 +1,13 @@
 import { StyleSheet, Text } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { useWindowDimensions } from "react-native";
 import { PlantlyButton } from "@/components/PlantlyButton";
 import { theme } from "@/theme";
 import { useRouter } from "expo-router";
-import { Image } from "expo-image";
 import { useUserStore } from "@/store/userStore";
-import { View } from "react-native-reanimated/lib/typescript/Animated";
 import { StatusBar } from "expo-status-bar";
+import { PlantlyImage } from "@/components/PlantlyImage";
 
 export default function OnboardingScreen() {
-    const { width } = useWindowDimensions();
-
-    const imageSize = Math.min(width / 1.5, 400);
 
     const router = useRouter()
     const toggleHasOnboarded = useUserStore(state => state.toggleHasOnboarded);
@@ -30,9 +25,7 @@ export default function OnboardingScreen() {
             <Text style={styles.headerText}>
                 Welcome to Plantly!
             </Text>
-            <Image
-                style={[styles.image, { width: imageSize, height: imageSize }]}
-                source={require('@/assets/images/logo1.png')}
+            <PlantlyImage
             />
             <PlantlyButton
                 title="Go Water My Plants"
