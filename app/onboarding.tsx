@@ -61,10 +61,8 @@ const styles = StyleSheet.create({
         color: theme.colorWhite,
     },
     image: {
-        marginBottom: 20,
-        borderRadius: 8,
-        borderWidth: 2,
-        borderColor: theme.colorWhite,
+        marginBottom: 40,
+        marginTop: 20,
         alignSelf: "center",
     }
 });
