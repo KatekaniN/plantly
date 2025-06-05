@@ -17,7 +17,7 @@ export default function OnboardingScreen() {
 
     return (
         <LinearGradient
-            colors={[theme.colorAppleGreen, theme.colorLimeGreen, theme.colorGreen]}
+            colors={[theme.colorAppleGreen, theme.colorGreen, theme.colorLimeGreen]}
             style={styles.container}>
             <PlantlyButton
                 title="Water my plants!"
