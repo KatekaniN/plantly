@@ -57,8 +57,8 @@ const styles = StyleSheet.create({
         color: theme.colorWhite,
     },
     image: {
-        width: 200,
-        height: '100%',
+        width: 250,
+        height: 250,
         marginBottom: 20,
         borderRadius: 8,
         borderWidth: 2,
