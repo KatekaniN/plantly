@@ -11,7 +11,7 @@ export function PlantlyButton({ title, onPress }: Props) {
     return (
         <Pressable onPress={onPress} style={styles.button}>
             <Text style={styles.text}>{title}
-                <MaterialCommunityIcons name="leaf" size={size} color="white" />
+                <MaterialCommunityIcons name="leaf" size={24} color="white" />
             </Text>
         </Pressable>
     );
