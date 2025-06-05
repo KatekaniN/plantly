@@ -11,7 +11,9 @@ export function PlantlyButton({ title, onPress }: Props) {
     return (
         <Pressable onPress={onPress} style={styles.button}>
             <Text style={styles.text}>{title}
-                <MaterialCommunityIcons name="leaf" size={24} color="white" />
+                <Text style={styles.iconSpacing}>
+                    <MaterialCommunityIcons name="leaf" size={24} color="white" />
+                </Text>
             </Text>
         </Pressable>
     );
@@ -26,9 +28,10 @@ const styles = StyleSheet.create({
     button: {
         paddingHorizontal: 18,
         paddingVertical: 12,
-        justifyContent: "space-between",
-        gap: 8,
         borderRadius: 6,
         backgroundColor: theme.colorGreen,
     },
+    iconSpacing: {
+        marginLeft: 8, // Adjust this value for more or less spacing
+    }
 });
