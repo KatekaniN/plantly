@@ -20,15 +20,14 @@ export function PlantlyButton({ title, onPress }: Props) {
 const styles = StyleSheet.create({
     text: {
         color: "white",
-        justifyContent: "space-between",
-        gap: 8,
-        flexDirection: "row",
         fontSize: 18,
         fontWeight: "bold",
     },
     button: {
         paddingHorizontal: 18,
         paddingVertical: 12,
+        justifyContent: "space-between",
+        gap: 8,
         borderRadius: 6,
         backgroundColor: theme.colorGreen,
     },
