@@ -7,7 +7,7 @@ export default function App() {
   const toggleHasOnboarded = useUserStore((state) => state.toggleHasOnboarded);
   return (
     <View style={styles.container}>
-      <PlantlyButton title="Go to Onboarding" onPress={toggleHasOnboarded} icon={"back"} />
+      <PlantlyButton title="Go to Onboarding" onPress={toggleHasOnboarded} icon={"back-in-time"} />
     </View>
   );
 }
