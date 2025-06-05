@@ -26,7 +26,7 @@ export function PlantlyButton({ title, onPress }: Props) {
 const styles = StyleSheet.create({
     text: {
         color: "white",
-        fontSize: 22,
+        fontSize: 18,
         fontWeight: "bold",
     },
     button: {
