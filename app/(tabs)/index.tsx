@@ -1,4 +1,3 @@
-import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View, Button } from "react-native";
 import { theme } from "../../theme";
 import { useUserStore } from "@/store/userStore";
@@ -8,7 +7,6 @@ export default function App() {
   return (
     <View style={styles.container}>
       <Button title="Go back to Onboarding" onPress={toggleHasOnboarded} />
-      <StatusBar style="auto" />
     </View>
   );
 }

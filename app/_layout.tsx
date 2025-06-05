@@ -9,11 +9,13 @@ export default function Layout() {
                 name="(tabs)"
                 options={{
                     headerShown: false,
+                    animation: 'fade',
                 }}>
             </Stack.Screen>
             <Stack.Screen
                 name="onboarding"
                 options={{
+                    animation: 'fade',
                     headerShown: false,
                     title: 'Onboarding',
                     presentation: 'modal',
