@@ -10,7 +10,7 @@ export default function OnboardingScreen() {
 
     const handlePress = () => {
         toggleHasOnboarded();
-        router.replace("/(tabs)");
+        router.replace("/");
     }
 
     return (
