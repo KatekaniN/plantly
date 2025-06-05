@@ -5,6 +5,7 @@ import { theme } from "@/theme";
 import { useRouter } from "expo-router";
 import { useUserStore } from "@/store/userStore";
 import { View } from "react-native-reanimated/lib/typescript/Animated";
+import { StatusBar } from "expo-status-bar";
 
 export default function OnboardingScreen() {
 
@@ -20,11 +21,12 @@ export default function OnboardingScreen() {
         <LinearGradient
             colors={[theme.colorAppleGreen, theme.colorLimeGreen, theme.colorGreen]}
             style={styles.container}>
+            <StatusBar style="light" />
             <Text style={styles.headerText}>
                 Welcome to Plantly!
             </Text>
             <PlantlyButton
-                title="Go Water My Plants!"
+                title="Go Water My Plants"
                 onPress={handlePress} />
 
         </LinearGradient>
