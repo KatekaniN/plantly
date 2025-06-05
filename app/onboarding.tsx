@@ -1,9 +1,10 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, Text } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { PlantlyButton } from "@/components/PlantlyButton";
 import { theme } from "@/theme";
 import { useRouter } from "expo-router";
 import { useUserStore } from "@/store/userStore";
+import { View } from "react-native-reanimated/lib/typescript/Animated";
 
 export default function OnboardingScreen() {
 
@@ -19,10 +20,13 @@ export default function OnboardingScreen() {
         <LinearGradient
             colors={[theme.colorAppleGreen, theme.colorLimeGreen, theme.colorGreen]}
             style={styles.container}>
+            <Text style={[styles.text, { color: theme.colorWhite }]}>
+                Welcome to Plantly!
+            </Text>
             <PlantlyButton
-                title="Water my plants!"
-                onPress={handlePress} >
-            </PlantlyButton>
+                title="Go Water My Plants!"
+                onPress={handlePress} />
+
         </LinearGradient>
     );
 }
