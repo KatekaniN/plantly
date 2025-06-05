@@ -21,6 +21,8 @@ const styles = StyleSheet.create({
     text: {
         color: "white",
         justifyContent: "space-between",
+        gap: 8,
+        flexDirection: "row",
         fontSize: 18,
         fontWeight: "bold",
     },
