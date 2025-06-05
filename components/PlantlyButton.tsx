@@ -13,7 +13,7 @@ export function PlantlyButton({ title, onPress }: Props) {
             <View style={styles.contentContainer}>
                 <Text style={styles.text}>{title}</Text>
                 <MaterialCommunityIcons
-                    name="leaf"
+                    name="watering-can"
                     size={24}
                     color="white"
                     style={styles.icon}
@@ -41,6 +41,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     icon: {
-        marginLeft: 10, // Adjust this value to increase or decrease spacing
+        marginLeft: 10,
     }
 });

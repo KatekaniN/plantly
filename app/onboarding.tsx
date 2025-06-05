@@ -17,7 +17,7 @@ export default function OnboardingScreen() {
     return (
         <View style={styles.container}>
             <PlantlyButton
-                title="Let me see my plants!"
+                title="I want to water my plants!"
                 onPress={handlePress} >
             </PlantlyButton>
         </View>
