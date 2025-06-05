@@ -20,7 +20,7 @@ export default function OnboardingScreen() {
         <LinearGradient
             colors={[theme.colorAppleGreen, theme.colorLimeGreen, theme.colorGreen]}
             style={styles.container}>
-            <Text style={[styles.text, { color: theme.colorWhite }]}>
+            <Text style={styles.headerText}>
                 Welcome to Plantly!
             </Text>
             <PlantlyButton
@@ -41,4 +41,11 @@ const styles = StyleSheet.create({
     text: {
         fontSize: 24,
     },
+    headerText: {
+        fontSize: 32,
+        fontWeight: "bold",
+        marginBottom: 20,
+        textAlign: "center",
+        color: theme.colorWhite,
+    }
 });
