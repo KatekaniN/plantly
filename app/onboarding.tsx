@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
         top: 20,
         marginBottom: 20,
         textAlign: "center",
-        color: theme.colorWhite,
+        color: theme.colorLeafyGreen,
     },
     image: {
         marginBottom: 40,
