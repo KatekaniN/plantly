@@ -4,7 +4,7 @@ import { Image } from "expo-image";
 export function PlantlyImage() {
     const { width } = useWindowDimensions();
 
-    const imageSize = Math.min(width / 1.5, 400);
+    const imageSize = Math.min(width / 1.2, 400);
 
     return (
         <Image
