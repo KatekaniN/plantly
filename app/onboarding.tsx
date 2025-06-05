@@ -25,8 +25,7 @@ export default function OnboardingScreen() {
             <Text style={styles.headerText}>
                 Welcome to Plantly!
             </Text>
-            <PlantlyImage
-            />
+            <PlantlyImage />
             <PlantlyButton
                 title="Go Water My Plants"
                 onPress={handlePress} />
@@ -53,9 +52,4 @@ const styles = StyleSheet.create({
         textAlign: "center",
         color: theme.colorLeafyGreen,
     },
-    image: {
-        marginBottom: 40,
-        marginTop: 20,
-        alignSelf: "center",
-    }
 });
