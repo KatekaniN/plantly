@@ -1,4 +1,5 @@
-import { Text, View, StyleSheet, Button } from "react-native";
+import { StyleSheet } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import { PlantlyButton } from "@/components/PlantlyButton";
 import { theme } from "@/theme";
 import { useRouter } from "expo-router";
@@ -15,12 +16,14 @@ export default function OnboardingScreen() {
     }
 
     return (
-        <View style={styles.container}>
+        <LinearGradient
+            colors={[theme.colorAppleGreen, theme.colorLimeGreen, theme.colorGreen]}
+            style={styles.container}>
             <PlantlyButton
                 title="Water my plants!"
                 onPress={handlePress} >
             </PlantlyButton>
-        </View>
+        </LinearGradient>
     );
 }
 

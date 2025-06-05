@@ -17,24 +17,22 @@ type Props = {
 };
 
 export function PlantlyButton({ title, onPress, icon = "leaf" }: Props) {
-    // Create a shared value for the scale animation
     const scale = useSharedValue(1);
-
-    // Create an animated style for the button wrapper
-    const animatedStyle = useAnimatedStyle(() => ({
+// Using useSharedValue to create a shared value for scale animation
+    const animatedStyle = useAnimatedStyle(() => ({ // Using useAnimatedStyle to create an animated style based on the scale value
         transform: [{ scale: scale.value }]
     }));
 
-    // Handler functions
-    const handlePressIn = () => {
+
+    const handlePressIn = () => { // When the button is pressed in, we animate the scale down to 0.9
         scale.value = withSpring(0.9, {
             damping: 15,
-            stiffness: 120,
+            stiffness: 120, 
             mass: 0.6
         });
     };
 
-    const handlePressOut = () => {
+    const handlePressOut = () => { // When the button is released, we animate the scale back to 1
         scale.value = withSpring(1, {
             damping: 15,
             stiffness: 120,
@@ -50,7 +48,7 @@ export function PlantlyButton({ title, onPress, icon = "leaf" }: Props) {
     };
 
     return (
-        <Animated.View style={[styles.buttonWrapper, animatedStyle]}>
+        <Animated.View style={[styles.buttonWrapper, animatedStyle]}> 
             <Pressable
                 onPressIn={handlePressIn}
                 onPressOut={handlePressOut}
@@ -76,8 +74,7 @@ export function PlantlyButton({ title, onPress, icon = "leaf" }: Props) {
 
 const styles = StyleSheet.create({
     buttonWrapper: {
-        // This wrapper will handle the scale animation
-        alignSelf: 'center',  // This helps with proper scaling
+        alignSelf: 'center', 
     },
     text: {
         color: theme.colorWhite,
