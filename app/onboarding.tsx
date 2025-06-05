@@ -32,10 +32,10 @@ const slides: OnboardingSlide[] = [
     {
         id: 1,
         title: "Welcome to",
-        subtitle: "Plantly! 🌱",
+        subtitle: "Plantly!",
         description: "Your personal plant care companion that helps you keep your green friends happy and healthy",
         colors: [theme.colorAppleGreen, theme.colorLimeGreen, theme.colorGreen],
-        icon: "🌿",
+        icon: "",
         showImage: true,
     },
     {
@@ -43,7 +43,7 @@ const slides: OnboardingSlide[] = [
         title: "Never Forget",
         subtitle: "to Water Again! 💧",
         description: "Set smart reminders for each plant and get notified exactly when it's time to water",
-        colors: [theme.colorGreen, theme.colorLightGreen, theme.colorLimeGreen],
+        colors: [theme.colorBeige, theme.colorWhite, theme.colorBeige],
         icon: "⏰",
     },
     {
@@ -59,7 +59,7 @@ const slides: OnboardingSlide[] = [
         title: "Expert Care",
         subtitle: "Tips & Guides 💡",
         description: "Get personalized advice and learn the best practices for plant care",
-        colors: [theme.colorLimeGreen, theme.colorAppleGreen, theme.colorGreen],
+        colors: [theme.colorBeige, theme.colorWhite, theme.colorBeige],
         icon: "🌟",
     },
 ];
@@ -121,30 +121,34 @@ export default function OnboardingScreen() {
         setCurrentSlide(slideIndex);
     };
 
-    const renderSlide = (slide: OnboardingSlide, index: number) => (
-        <LinearGradient
-            key={slide.id}
-            colors={slide.colors as any}
-            style={styles.slide}
-        >
-            <View style={styles.slideContent}>
-                <Text style={styles.icon}>{slide.icon}</Text>
+    const renderSlide = (slide: OnboardingSlide, index: number) => {
+        const isBeige = slide.colors.includes(theme.colorBeige);
 
-                <View style={styles.titleContainer}>
-                    <Text style={styles.title}>{slide.title}</Text>
-                    <Text style={styles.subtitle}>{slide.subtitle}</Text>
-                </View>
+        return (
+            <LinearGradient
+                key={slide.id}
+                colors={slide.colors}
+                style={styles.slide}
+            >
+                <View style={styles.slideContent}>
+                    {slide.icon && <Text style={styles.icon}>{slide.icon}</Text>}
 
-                {slide.showImage && (
-                    <View style={styles.imageContainer}>
-                        <PlantlyImage />
+                    <View style={styles.titleContainer}>
+                        <Text style={[styles.title, isBeige && styles.titleBeige]}>{slide.title}</Text>
+                        <Text style={[styles.subtitle, isBeige && styles.subtitleBeige]}>{slide.subtitle}</Text>
                     </View>
-                )}
 
-                <Text style={styles.description}>{slide.description}</Text>
-            </View>
-        </LinearGradient>
-    );
+                    {slide.showImage && (
+                        <View style={styles.imageContainer}>
+                            <PlantlyImage />
+                        </View>
+                    )}
+
+                    <Text style={[styles.description, isBeige && styles.descriptionBeige]}>{slide.description}</Text>
+                </View>
+            </LinearGradient>
+        );
+    };
 
     const renderPagination = () => (
         <View style={styles.pagination}>
@@ -187,22 +191,20 @@ export default function OnboardingScreen() {
 
                 <View style={styles.navigationButtons}>
                     {currentSlide > 0 && (
-                        <Pressable
-                            style={[styles.navButton, styles.previousButton]}
+                        <PlantlyButton
+                            title="Previous"
                             onPress={handlePrevious}
-                        >
-                            <Text style={styles.navButtonText}>← Previous</Text>
-                        </Pressable>
+                        />
                     )}
 
                     {currentSlide < slides.length - 1 ? (
                         <PlantlyButton
-                            title="Next →"
+                            title="Next"
                             onPress={handleNext}
                         />
                     ) : (
                         <PlantlyButton
-                            title="Let's Start Growing! 🌱"
+                            title="Start Growing"
                             onPress={handleGetStarted}
                         />
                     )}
@@ -249,6 +251,9 @@ const styles = StyleSheet.create({
         textAlign: "center",
         marginBottom: 8,
     },
+    titleBeige: {
+        color: theme.colorLeafyGreen,
+    },
     subtitle: {
         fontSize: 32,
         fontWeight: "bold",
@@ -257,6 +262,10 @@ const styles = StyleSheet.create({
         textShadowColor: 'rgba(0, 0, 0, 0.3)',
         textShadowOffset: { width: 1, height: 1 },
         textShadowRadius: 3,
+    },
+    subtitleBeige: {
+        color: theme.colorLeafyGreen,
+        textShadowColor: 'rgba(255, 255, 255, 0.5)',
     },
     imageContainer: {
         marginVertical: 30,
@@ -273,6 +282,10 @@ const styles = StyleSheet.create({
         textShadowColor: 'rgba(0, 0, 0, 0.2)',
         textShadowOffset: { width: 0, height: 1 },
         textShadowRadius: 2,
+    },
+    descriptionBeige: {
+        color: theme.colorBlack,
+        textShadowColor: 'rgba(255, 255, 255, 0.3)',
     },
     pagination: {
         flexDirection: "row",
@@ -312,24 +325,8 @@ const styles = StyleSheet.create({
     },
     navigationButtons: {
         flexDirection: "row",
-        justifyContent: "space-between",
+        justifyContent: "center",
         alignItems: "center",
-        gap: 15,
-    },
-    navButton: {
-        paddingVertical: 12,
-        paddingHorizontal: 20,
-        borderRadius: 25,
-        borderWidth: 2,
-        borderColor: theme.colorGreen,
-        backgroundColor: theme.colorWhite,
-    },
-    previousButton: {
-        borderColor: theme.colorGrey,
-    },
-    navButtonText: {
-        fontSize: 16,
-        color: theme.colorGrey,
-        fontWeight: "600",
+        gap: 20,
     },
 });
