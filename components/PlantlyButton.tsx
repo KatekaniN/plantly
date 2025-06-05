@@ -4,6 +4,7 @@ import FontAwesome6 from '@expo/vector-icons/FontAwesome5';
 import Animated, {
     useSharedValue,
     useAnimatedStyle,
+    withSpring,
     withTiming,
     Easing
 } from 'react-native-reanimated';
@@ -18,36 +19,44 @@ type Props = {
 };
 
 export function PlantlyButton({ title, onPress, icon = "leaf" }: Props) {
-
+    // Create a shared value for the scale animation
     const scale = useSharedValue(1);
 
-    const animatedStyle = useAnimatedStyle(() => {
-        return {
-            transform: [{ scale: scale.value }]
-        };
-    });
+    // Create an animated style using Reanimated 3 syntax
+    const animatedStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: scale.value }]
+    }));
+
+    // Handler functions
+    const handlePressIn = () => {
+        // Scale down to 90% with a spring animation for a more natural feel
+        scale.value = withSpring(0.9, {
+            damping: 15,
+            stiffness: 120,
+            mass: 0.6
+        });
+    };
+
+    const handlePressOut = () => {
+        // Scale back to original size with a spring animation
+        scale.value = withSpring(1, {
+            damping: 15,
+            stiffness: 120,
+            mass: 0.6
+        });
+    };
 
     const hapticOnPress = () => {
         if (Platform.OS === 'ios' || Platform.OS === 'android') {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         }
         onPress();
-    }
+    };
 
     return (
         <Pressable
-            onPressIn={() => {
-                scale.value = withTiming(0.9, {
-                    duration: 100,
-                    easing: Easing.bezier(0.25, 0.1, 0.25, 1),
-                });
-            }}
-            onPressOut={() => {
-                scale.value = withTiming(1, {
-                    duration: 150,
-                    easing: Easing.bezier(0.25, 0.1, 0.25, 1),
-                });
-            }}
+            onPressIn={handlePressIn}
+            onPressOut={handlePressOut}
             onPress={hapticOnPress}
             style={({ pressed }) => pressed ? [styles.button, styles.buttonPressed] : styles.button}
         >
@@ -75,6 +84,7 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         borderRadius: 6,
         backgroundColor: theme.colorGreen,
+        overflow: 'hidden', // Ensures the animation stays within the button boundaries
     },
     contentContainer: {
         flexDirection: 'row',
