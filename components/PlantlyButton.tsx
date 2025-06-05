@@ -1,11 +1,11 @@
 import { theme } from "@/theme";
 import { StyleSheet, Text, Pressable, View } from "react-native";
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { MaterialCommunityIcons as MaterialCommunityIconsType } from '@expo/vector-icons';
+import Entypo from '@expo/vector-icons/Entypo';
+import { Entypo as EntypoType } from '@expo/vector-icons';
 
 type Props = {
     title: string;
-    icon?: React.ComponentProps<typeof MaterialCommunityIconsType>['name'];
+    icon?: React.ComponentProps<typeof EntypoType>['name'];
     onPress: () => void;
 };
 
@@ -14,7 +14,7 @@ export function PlantlyButton({ title, onPress, icon = "leaf" }: Props) {
         <Pressable onPress={onPress} style={styles.button}>
             <View style={styles.contentContainer}>
                 <Text style={styles.text}>{title}</Text>
-                <MaterialCommunityIcons
+                <Entypo
                     name={icon}
                     size={28}
                     color="white"
