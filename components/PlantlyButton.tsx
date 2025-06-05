@@ -5,8 +5,6 @@ import Animated, {
     useSharedValue,
     useAnimatedStyle,
     withSpring,
-    withTiming,
-    Easing
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { FontAwesome6 as FontAwesome6Type } from '@expo/vector-icons';
@@ -27,7 +25,6 @@ export function PlantlyButton({ title, onPress, icon = "leaf" }: Props) {
         transform: [{ scale: scale.value }]
     }));
 
-    // Handler functions
     const handlePressIn = () => {
         // Scale down to 90% with a spring animation for a more natural feel
         scale.value = withSpring(0.9, {
@@ -84,7 +81,7 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         borderRadius: 6,
         backgroundColor: theme.colorGreen,
-        overflow: 'hidden', // Ensures the animation stays within the button boundaries
+        overflow: 'hidden', 
     },
     contentContainer: {
         flexDirection: 'row',
