@@ -1,5 +1,6 @@
 import { theme } from "@/theme";
 import { StyleSheet, Text, Pressable } from "react-native";
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 type Props = {
     title: string;
@@ -9,7 +10,9 @@ type Props = {
 export function PlantlyButton({ title, onPress }: Props) {
     return (
         <Pressable onPress={onPress} style={styles.button}>
-            <Text style={styles.text}>{title}</Text>
+            <Text style={styles.text}>{title}
+                <MaterialCommunityIcons name="leaf" size={size} color="white" />
+            </Text>
         </Pressable>
     );
 }
