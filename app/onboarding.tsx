@@ -26,8 +26,8 @@ export default function OnboardingScreen() {
                 Plantly!
             </Text>
             <Text style={styles.text}>
-                Welcome to Plantly, your personal plant care assistant.
-                Let's get started by watering your plants!
+                Welcome to Plantly!
+                Your personal plant care assistant.
             </Text>
             <PlantlyImage />
             <PlantlyButton
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
         backgroundColor: theme.colorWhite,
     },
     text: {
-        fontSize: 24,
+        fontSize: 16,
         textAlign: "center",
         maxWidth: 300,
         marginBottom: 20,
