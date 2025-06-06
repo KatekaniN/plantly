@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
         textAlign: "center",
         maxWidth: 300,
-        textDecorationColor: theme.colorWhite,
+        color: theme.colorWhite,
         paddingHorizontal: 20,
 
     },
