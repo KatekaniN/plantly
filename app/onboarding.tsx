@@ -25,14 +25,12 @@ export default function OnboardingScreen() {
             <Text style={styles.headerText}>
                 Plantly
             </Text>
-            <View style={styles.text}>
-                <Text>
-                    Welcome to Plantly!
-                </Text>
-                <Text>
-                    Your personal plant care assistant.
-                </Text>
-            </View>
+
+
+            <Text style={styles.text}>
+                Your personal plant care assistant.
+            </Text>
+
             <PlantlyImage />
             <PlantlyButton
                 title="Go Water My Plants"
@@ -50,7 +48,7 @@ const styles = StyleSheet.create({
         backgroundColor: theme.colorWhite,
     },
     text: {
-        fontSize: 16,
+        fontSize: 18,
         justifyContent: "center",
         alignItems: "center",
         marginTop: 20,
