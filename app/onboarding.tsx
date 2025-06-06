@@ -51,6 +51,9 @@ const styles = StyleSheet.create({
     },
     text: {
         fontSize: 16,
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: 20,
         textAlign: "center",
         maxWidth: 300,
         textDecorationColor: theme.colorLeafyGreen,
