@@ -1,4 +1,4 @@
-import { StyleSheet, Text } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { PlantlyButton } from "@/components/PlantlyButton";
 import { theme } from "@/theme";
@@ -23,12 +23,16 @@ export default function OnboardingScreen() {
             style={styles.container}>
             <StatusBar style="light" />
             <Text style={styles.headerText}>
-                Plantly!
+                Plantly
             </Text>
-            <Text style={styles.text}>
-                Welcome to Plantly!
-                Your personal plant care assistant.
-            </Text>
+            <View>
+                <Text style={styles.text}>
+                    Welcome to Plantly!
+                </Text>
+                <Text>
+                    Your personal plant care assistant.
+                </Text>
+            </View>
             <PlantlyImage />
             <PlantlyButton
                 title="Go Water My Plants"
@@ -49,6 +53,8 @@ const styles = StyleSheet.create({
         fontSize: 16,
         textAlign: "center",
         maxWidth: 300,
+        textShadowColor: theme.colorLimeGreen,
+        textShadowOffset: { width: 1, height: 1 },
         marginBottom: 20,
         paddingHorizontal: 20,
         marginTop: 20,
