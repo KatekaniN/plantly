@@ -23,7 +23,11 @@ export default function OnboardingScreen() {
             style={styles.container}>
             <StatusBar style="light" />
             <Text style={styles.headerText}>
-                Welcome to Plantly!
+                Plantly!
+            </Text>
+            <Text>
+                Welcome to Plantly, your personal plant care assistant.
+                Let's get started by watering your plants!
             </Text>
             <PlantlyImage />
             <PlantlyButton
