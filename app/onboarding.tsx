@@ -25,8 +25,8 @@ export default function OnboardingScreen() {
             <Text style={styles.headerText}>
                 Plantly
             </Text>
-            <View>
-                <Text style={styles.text}>
+            <View style={styles.text}>
+                <Text>
                     Welcome to Plantly!
                 </Text>
                 <Text>
@@ -53,11 +53,8 @@ const styles = StyleSheet.create({
         fontSize: 16,
         textAlign: "center",
         maxWidth: 300,
-        textShadowColor: theme.colorLimeGreen,
-        textShadowOffset: { width: 1, height: 1 },
-        marginBottom: 20,
+        textDecorationColor: theme.colorLeafyGreen,
         paddingHorizontal: 20,
-        marginTop: 20,
         color: theme.colorWhite,
     },
     headerText: {
