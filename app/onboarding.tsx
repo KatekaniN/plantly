@@ -25,8 +25,6 @@ export default function OnboardingScreen() {
             <Text style={styles.headerText}>
                 Plantly
             </Text>
-
-
             <Text style={styles.text}>
                 Your personal plant care assistant.
             </Text>
@@ -51,10 +49,10 @@ const styles = StyleSheet.create({
         fontSize: 18,
         justifyContent: "center",
         alignItems: "center",
-        marginTop: 20,
+        marginTop: 10,
         textAlign: "center",
         maxWidth: 300,
-        textDecorationColor: theme.colorLimeGreen,
+        textDecorationColor: theme.colorWhite,
         paddingHorizontal: 20,
 
     },
