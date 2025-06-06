@@ -56,9 +56,9 @@ const styles = StyleSheet.create({
         marginTop: 20,
         textAlign: "center",
         maxWidth: 300,
-        textDecorationColor: theme.colorLeafyGreen,
+        textDecorationColor: theme.colorLimeGreen,
         paddingHorizontal: 20,
-        color: theme.colorWhite,
+
     },
     headerText: {
         fontSize: 32,
