@@ -1,13 +1,12 @@
 import { StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { PlantlyButton } from "@/components/PlantlyButton";
+import { OnboardingButton } from "@/components/OnboardingButton"; // Import the new component
 import Onboarding from 'react-native-onboarding-swiper';
 import { theme } from "@/theme";
 import { useRouter } from "expo-router";
 import { useUserStore } from "@/store/userStore";
 import OnboardingImage from "@/components/OnboardingImage";
 import { StatusBar } from "expo-status-bar";
-import { PlantlyImage } from "@/components/PlantlyImage";
 
 export default function OnboardingScreen() {
     const router = useRouter();
@@ -19,23 +18,27 @@ export default function OnboardingScreen() {
     };
 
     const CustomButton = ({ ...props }) => (
-        <PlantlyButton
+        <OnboardingButton
             title={props.title || "Next"}
             onPress={props.onPress}
+            variant="primary"
         />
     );
 
     const DoneButton = ({ ...props }) => (
-        <PlantlyButton
-            title="Start Caring for Plants"
+        <OnboardingButton
+            title="Get Started"
             onPress={props.onPress}
+            variant="done"
         />
     );
 
     const SkipButton = ({ ...props }) => (
-        <Text style={styles.skipButton} onPress={props.onPress}>
-            Skip
-        </Text>
+        <OnboardingButton
+            title="Skip"
+            onPress={props.onPress}
+            variant="skip"
+        />
     );
 
     return (
@@ -59,9 +62,7 @@ export default function OnboardingScreen() {
                         backgroundColor: 'transparent',
                         image: (
                             <View style={styles.pageImageContainer}>
-                                {/* AI Prompt: "A cheerful cartoon illustration of a smiling person holding a small potted plant, surrounded by various colorful houseplants like monstera, snake plant, and pothos in a bright, modern living room setting" */}
                                 <OnboardingImage source={require('../assets/images/plantly-1.png')} />
-
                             </View>
                         ),
                         title: (
@@ -76,13 +77,10 @@ export default function OnboardingScreen() {
                         ),
                     },
                     {
-
                         backgroundColor: 'transparent',
                         image: (
                             <View style={styles.pageImageContainer}>
-                                {/* AI Prompt: "A cute cartoon illustration of a smartphone with notification bubbles showing water drop icons and plant emojis, with a calendar in the background showing scheduled watering days, in a clean minimalist style" */}
                                 <OnboardingImage source={require('../assets/images/plantly-2.png')} />
-
                             </View>
                         ),
                         title: (
@@ -100,9 +98,7 @@ export default function OnboardingScreen() {
                         backgroundColor: 'transparent',
                         image: (
                             <View style={styles.pageImageContainer}>
-                                {/* AI Prompt: "A vibrant cartoon illustration showing different types of plants (succulent, fern, flowering plant, herb garden) each with unique care icons (water drops, sun rays, temperature gauge), arranged in a beautiful garden setting" */}
                                 <OnboardingImage source={require('../assets/images/plantly-3.png')} />
-
                             </View>
                         ),
                         title: (
@@ -120,9 +116,7 @@ export default function OnboardingScreen() {
                         backgroundColor: 'transparent',
                         image: (
                             <View style={styles.pageImageContainer}>
-                                {/* AI Prompt: "A heartwarming cartoon illustration of thriving, lush green plants in various pots with sparkles and growth indicators around them, showing a transformation from small seedlings to full grown plants, conveying success and growth" */}
                                 <OnboardingImage source={require('../assets/images/plantly-4.png')} />
-
                             </View>
                         ),
                         title: (
@@ -174,12 +168,5 @@ const styles = StyleSheet.create({
         paddingHorizontal: 30,
         lineHeight: 24,
         opacity: 0.9,
-    },
-    skipButton: {
-        fontSize: 16,
-        color: theme.colorWhite,
-        paddingHorizontal: 20,
-        paddingVertical: 10,
-        opacity: 0.8,
     },
 });
