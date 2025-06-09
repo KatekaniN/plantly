@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { OnboardingButton } from "@/components/OnboardingButton"; // Import the new component
+import { OnboardingButton } from "@/components/OnboardingButton";
 import Onboarding from 'react-native-onboarding-swiper';
 import { theme } from "@/theme";
 import { useRouter } from "expo-router";
@@ -62,7 +62,7 @@ export default function OnboardingScreen() {
                         backgroundColor: 'transparent',
                         image: (
                             <View style={styles.pageImageContainer}>
-                                <OnboardingImage source={require('../assets/images/plantly-1.png')} />
+                                <OnboardingImage source={require('../assets/images/plantly.png')} />
                             </View>
                         ),
                         title: (
