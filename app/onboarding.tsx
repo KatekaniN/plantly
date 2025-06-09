@@ -5,7 +5,7 @@ import Onboarding from 'react-native-onboarding-swiper';
 import { theme } from "@/theme";
 import { useRouter } from "expo-router";
 import { useUserStore } from "@/store/userStore";
-import { OnboardingImage } from "@/components/OnboardingImage";
+import OnboardingImage from "@/components/OnboardingImage";
 import { StatusBar } from "expo-status-bar";
 import { PlantlyImage } from "@/components/PlantlyImage";
 

@@ -2,7 +2,7 @@ import { useWindowDimensions } from "react-native";
 import { Image } from "expo-image";
 import { ImageSourcePropType } from "react-native";
 
-export function PlantlyImage({ source }: { source: ImageSourcePropType }) {
+export default function OnboardingImage({ source }: { source: ImageSourcePropType }) {
     const { width } = useWindowDimensions();
     const imageSize = Math.min(width / 1.2, 400);
 
