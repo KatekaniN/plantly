@@ -1,7 +1,7 @@
 import { useWindowDimensions } from "react-native";
 import { Image } from "expo-image";
 
-export function PlantlyImage() {
+export function PlantlyImage({ source }: { source?: string }) {
     const { width } = useWindowDimensions();
 
     const imageSize = Math.min(width / 1.2, 400);
