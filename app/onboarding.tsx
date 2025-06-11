@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, Dimensions } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { OnboardingButton } from "@/components/OnboardingButton";
 import Onboarding from 'react-native-onboarding-swiper';
@@ -8,6 +8,9 @@ import { useUserStore } from "@/store/userStore";
 import OnboardingImage from "@/components/OnboardingImage";
 import { StatusBar } from "expo-status-bar";
 
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
+
 export default function OnboardingScreen() {
     const router = useRouter();
     const toggleHasOnboarded = useUserStore(state => state.toggleHasOnboarded);
@@ -16,6 +19,8 @@ export default function OnboardingScreen() {
         toggleHasOnboarded();
         router.replace("/");
     };
+
+
 
     const CustomButton = ({ ...props }) => (
         <OnboardingButton
@@ -152,7 +157,7 @@ const styles = StyleSheet.create({
         height: 250,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: -30,
+        marginBottom: -(windowHeight * 0.05),
     },
     title: {
         fontSize: 28,
@@ -160,14 +165,14 @@ const styles = StyleSheet.create({
         color: "#fff",
         textAlign: 'center',
         marginBottom: 10,
-        paddingHorizontal: 25,
+        paddingHorizontal: windowWidth * 0.1,
     },
     subtitle: {
         fontSize: 16,
         color: "#145A32",
-        marginTop: 40,
+        marginTop: windowHeight * 0.1,
         textAlign: 'center',
-        paddingHorizontal: 80,
+        paddingHorizontal: windowWidth * 0.1,
         lineHeight: 24,
         opacity: 0.9,
     },
