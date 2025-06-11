@@ -68,12 +68,12 @@ export default function OnboardingScreen() {
                         ),
                         title: (
                             <Text style={styles.title}>
-                                Keep your plants happy and healthy
+                                Keeping your green friends happy and healthy
                             </Text>
                         ),
                         subtitle: (
                             <Text style={styles.subtitle}>
-                                Discover Plantly, your personal plant care assistant! Track watering schedules, get reminders, and watch your plants thrive
+                                Discover your personal plant care assistant. Helping you nurture your plants with ease and joy
                             </Text>
                         )
                     },
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
     subtitle: {
         fontSize: 16,
         color: "#145A32",
-        paddingVertical: 10,
+        paddingVertical: 40,
         textAlign: 'center',
         paddingHorizontal: 30,
         lineHeight: 24,
