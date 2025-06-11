@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
         marginBottom: -(windowHeight * 0.01),
     },
     title: {
-        fontSize: 28,
+        fontSize: 30,
         fontWeight: 'bold',
         color: "#fff",
         textAlign: 'center',
