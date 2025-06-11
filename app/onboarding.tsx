@@ -43,7 +43,7 @@ export default function OnboardingScreen() {
 
     return (
         <LinearGradient
-            colors={[theme.colorAppleGreen, theme.colorLimeGreen, theme.colorGreen]}
+            colors={[theme.colorAppleGreen, theme.colorWhite, theme.colorBlue]}
             style={styles.container}
         >
             <StatusBar style="light" />
@@ -62,19 +62,17 @@ export default function OnboardingScreen() {
                         backgroundColor: 'transparent',
                         image: (
                             <View style={styles.pageImageContainer}>
-                                <OnboardingImage source={require('../assets/images/plantly.png')} />
+                                <OnboardingImage source={require('../assets/images/plantly-1.png')} />
                             </View>
                         ),
                         title: (
                             <Text style={styles.title}>
-                                Welcome to Plantly
+                                Keep your plants happy and healthy
                             </Text>
                         ),
                         subtitle: (
-                            <Text style={styles.subtitle}>
-                                Your personal plant care assistant that helps you keep your green friends happy and healthy
-                            </Text>
-                        ),
+                            
+                        )
                     },
                     {
                         backgroundColor: 'transparent',

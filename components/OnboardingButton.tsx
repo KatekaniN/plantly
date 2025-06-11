@@ -1,7 +1,13 @@
 import { StyleSheet, Text, TouchableOpacity } from "react-native";
 import { theme } from "@/theme";
 
-export const OnboardingButton = ({ title = "Next", onPress, variant = "primary" }) => {
+type OnboardingButtonProps = {
+    title?: string;
+    onPress: () => void;
+    variant?: "primary" | "done" | "skip";
+};
+
+export const OnboardingButton: React.FC<OnboardingButtonProps> = ({ title = "Next", onPress, variant = "primary" }) => {
     return (
         <TouchableOpacity
             style={[
@@ -40,7 +46,7 @@ const styles = StyleSheet.create({
         elevation: 3,
     },
     buttonText: {
-        color: theme.colorGreen,
+        color: theme.colorLeafyGreen,
         fontSize: 16,
         fontWeight: "600",
         textAlign: "center",
@@ -50,7 +56,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 32,
     },
     doneButtonText: {
-        color: theme.colorGreen,
+        color: theme.colorAppleGreen,
         fontWeight: "700",
     },
     skipButton: {
