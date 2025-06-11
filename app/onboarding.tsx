@@ -160,11 +160,12 @@ const styles = StyleSheet.create({
         color: "#115707",
         textAlign: 'center',
         marginBottom: 10,
-        paddingHorizontal: 20,
+        paddingHorizontal: 10,
     },
     subtitle: {
         fontSize: 16,
         color: "#145A32",
+        paddingVertical: 10,
         textAlign: 'center',
         paddingHorizontal: 30,
         lineHeight: 24,
