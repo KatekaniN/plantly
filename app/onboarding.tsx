@@ -157,14 +157,14 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 28,
         fontWeight: 'bold',
-        color: "#00796B",
+        color: "#115707",
         textAlign: 'center',
         marginBottom: 10,
         paddingHorizontal: 20,
     },
     subtitle: {
         fontSize: 16,
-        color: "#5F7D6E ",
+        color: "#145A32",
         textAlign: 'center',
         paddingHorizontal: 30,
         lineHeight: 24,
