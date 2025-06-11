@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
         height: 250,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 20,
+        marginBottom: 8,
     },
     title: {
         fontSize: 28,
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
         color: "#115707",
         textAlign: 'center',
         marginBottom: 10,
-        paddingHorizontal: 10,
+        paddingHorizontal: 30,
     },
     subtitle: {
         fontSize: 16,
