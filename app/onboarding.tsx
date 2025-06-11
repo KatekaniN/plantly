@@ -71,7 +71,9 @@ export default function OnboardingScreen() {
                             </Text>
                         ),
                         subtitle: (
-                            
+                            <Text style={styles.subtitle}>
+                                Discover Plantly, your personal plant care assistant! Track watering schedules, get reminders, and watch your plants thrive
+                            </Text>
                         )
                     },
                     {
