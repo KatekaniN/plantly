@@ -43,7 +43,7 @@ export default function OnboardingScreen() {
 
     return (
         <LinearGradient
-            colors={[theme.colorAppleGreen, theme.colorWhite, theme.colorBlue]}
+            colors={[theme.colorWhite, theme.colorBlue, theme.colorGreen]}
             style={styles.container}
         >
             <StatusBar style="light" />
