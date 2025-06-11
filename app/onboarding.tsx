@@ -68,7 +68,7 @@ export default function OnboardingScreen() {
                         ),
                         title: (
                             <Text style={styles.title}>
-                                Keeping your green friends happy and healthy
+                                Keeping your green friends happy
                             </Text>
                         ),
                         subtitle: (
@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
         height: 250,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 0,
+        marginBottom: -30,
     },
     title: {
         fontSize: 28,
@@ -160,14 +160,14 @@ const styles = StyleSheet.create({
         color: "#fff",
         textAlign: 'center',
         marginBottom: 10,
-        paddingHorizontal: 30,
+        paddingHorizontal: 25,
     },
     subtitle: {
         fontSize: 16,
         color: "#145A32",
-        paddingVertical: 40,
+        marginTop: 40,
         textAlign: 'center',
-        paddingHorizontal: 30,
+        paddingHorizontal: 80,
         lineHeight: 24,
         opacity: 0.9,
     },
