@@ -43,8 +43,8 @@ export default function OnboardingScreen() {
 
     return (
         <LinearGradient
-            colors={['#E0F2F1', '#B2DFDB', '#4DD0E1']}
-            locations={[0, 0.7, 1]}
+            colors={["#E8F5E8", "#B8E6CC", "#A0D4B8"]}
+            locations={[0, 0.6, 1]}
             style={styles.container}
         >
             <StatusBar style="light" />
