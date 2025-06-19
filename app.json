@@ -13,17 +13,6 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-
-    "expo": {
-      "plugins": [
-        [
-          "expo-camera",
-          {
-            "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera"
-          }
-        ]
-      ]
-    },
     "ios": {
       "supportsTablet": true
     },
@@ -39,6 +28,14 @@
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
-    "plugins": ["expo-router"]
+    "plugins": [
+      "expo-router",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera"
+        }
+      ]
+    ]
   }
 }
