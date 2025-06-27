@@ -1,5 +1,6 @@
 import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
-import { useState, useEffect } from "react";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { useState, useEffect, useRef } from "react";
 import {
   Button,
   Text,
@@ -7,17 +8,36 @@ import {
   TouchableOpacity,
   View,
   Alert,
+  Image,
+  Pressable,
+  Platform,
 } from "react-native";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useRouter } from "expo-router";
 import { theme } from "@/theme";
 
 export default function CameraScreen() {
+  // State to manage which camera to use: front or back
   const [facing, setFacing] = useState<CameraType>("back");
-  const [cameraPermission, requestCameraPermission] = useCameraPermissions();
-  const [permissionStatus, setPermissionStatus] = useState("loading");
-  const router = useRouter();
 
-  // Handle permission status changes
+  // Reference to the camera component with proper typing
+  const cameraRef = useRef<any>(null);
+
+  // State to store the captured photo
+  const [photo, setPhoto] = useState<any>(null);
+
+  // State to track if camera is ready
+  const [isCameraReady, setCameraReady] = useState(false);
+
+  // Hook to request and track camera permissions
+  const [cameraPermission, requestCameraPermission] = useCameraPermissions();
+
+  // State to track the current permission status ("loading", "granted", "denied", "blocked")
+  const [permissionStatus, setPermissionStatus] = useState("loading");
+
+  const router = useRouter(); // Router hook for navigation
+
+  // Check and update permission status whenever `cameraPermission` changes
   useEffect(() => {
     if (cameraPermission === null) {
       setPermissionStatus("loading");
@@ -26,20 +46,18 @@ export default function CameraScreen() {
     } else if (cameraPermission.canAskAgain) {
       setPermissionStatus("denied");
     } else {
-      setPermissionStatus("blocked");
+      setPermissionStatus("blocked"); // User selected "Don't ask again"
     }
   }, [cameraPermission]);
 
-  // Function to handle permission request
+  // Function to handle requesting camera permission from user
   const handleRequestPermission = async () => {
-    console.log("Requesting camera permission...");
     const permissionResult = await requestCameraPermission();
 
     if (permissionResult.granted) {
-      console.log("Camera permission granted!");
       setPermissionStatus("granted");
     } else {
-      console.log("Camera permission denied:", permissionResult);
+      // If permission is denied, inform the user and offer option to open settings
       Alert.alert(
         "Camera Permission Required",
         "This app needs camera access to take plant photos. Please enable camera permissions in your device settings.",
@@ -54,20 +72,71 @@ export default function CameraScreen() {
     }
   };
 
-  const toggleCameraFacing = () => {
-    setFacing((current) => (current === "back" ? "front" : "back"));
+  // Function to handle when camera is ready
+  const onCameraReady = () => {
+    console.log("Camera is ready");
+    setCameraReady(true);
   };
 
-  // Show loading state
+  // Function to capture a photo
+  const takePicture = async () => {
+    console.log("Take picture button pressed");
+
+    if (!cameraRef.current) {
+      console.log("Camera ref is null");
+      Alert.alert("Error", "Camera not available");
+      return;
+    }
+
+    if (!isCameraReady) {
+      console.log("Camera is not ready yet");
+      Alert.alert("Please wait", "Camera is initializing...");
+      return;
+    }
+
+    try {
+      console.log("Attempting to take picture...");
+
+      // Simplified approach - remove platform-specific logic
+      const photo = await cameraRef.current.takePictureAsync({
+        quality: 0.7,
+        base64: false,
+        exif: false,
+      });
+
+      console.log("Photo captured:", photo);
+
+      if (photo && photo.uri) {
+        setPhoto(photo);
+        Alert.alert("Success", "Photo captured successfully!");
+
+        router.push({
+          pathname: "/plant-identification",
+          params: { photoUri: photo.uri },
+        });
+      } else {
+        throw new Error("No photo URI received");
+      }
+    } catch (error) {
+      console.error("Error taking picture:", error);
+      const errorMessage =
+        error && typeof error === "object" && "message" in error
+          ? (error as { message: string }).message
+          : String(error);
+      Alert.alert("Error", `Failed to take picture: ${errorMessage}`);
+    }
+  };
+
+  // If permission status is loading, show loading screen
   if (permissionStatus === "loading") {
     return (
-      <View style={[styles.container, { backgroundColor: "#fff" }]}>
+      <View style={[styles.container, { backgroundColor: theme.colorGreen }]}>
         <Text style={styles.message}>Loading camera...</Text>
       </View>
     );
   }
 
-  // Show permission request UI
+  // If permission is denied or blocked, show permission request screen
   if (permissionStatus === "denied" || permissionStatus === "blocked") {
     return (
       <View style={[styles.container, { backgroundColor: "#fff" }]}>
@@ -77,6 +146,8 @@ export default function CameraScreen() {
         <Text style={styles.submessage}>
           This allows you to take photos of your plants for identification
         </Text>
+
+        {/* Button to request camera permission */}
         <TouchableOpacity
           style={styles.permissionButton}
           onPress={handleRequestPermission}
@@ -84,6 +155,7 @@ export default function CameraScreen() {
           <Text style={styles.permissionButtonText}>Grant Camera Access</Text>
         </TouchableOpacity>
 
+        {/* Option to go back instead of granting permission */}
         <TouchableOpacity
           style={[styles.permissionButton, styles.secondaryButton]}
           onPress={() => router.back()}
@@ -94,35 +166,48 @@ export default function CameraScreen() {
     );
   }
 
-  // Show camera UI when permission is granted
+  // If permission is granted, show the camera interface
   return (
-    <View style={styles.container}>
-      <CameraView style={styles.camera} facing={facing}>
-        <View style={styles.topButtonContainer}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <Text style={styles.backButtonText}>← Back</Text>
-          </TouchableOpacity>
-        </View>
+    <View style={styles.container} pointerEvents="auto">
+      {/* Camera view using the selected facing direction */}
+      <CameraView
+        style={styles.camera}
+        facing={facing}
+        ref={cameraRef}
+        onCameraReady={onCameraReady}
+      />
 
-        <View style={styles.bottomButtonsContainer}>
-          <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
-            <Text style={styles.text}>Flip Camera</Text>
-          </TouchableOpacity>
+      {/* Back button positioned at the top */}
+      <View style={styles.topButtonContainer}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <Text style={styles.backButtonText}>← Back</Text>
+        </TouchableOpacity>
+      </View>
 
-          <TouchableOpacity
-            style={styles.captureButton}
-            onPress={() => {
-              console.log("Capture photo");
-              // Add photo capture logic here
-            }}
-          >
-            <View style={styles.captureButtonInner} />
-          </TouchableOpacity>
-        </View>
-      </CameraView>
+      {/* Bottom container with flip and capture buttons */}
+      <View style={styles.bottomButtonsContainer}>
+        {/* Capture photo */}
+        <Pressable
+          onPressIn={() => console.log("PRESS IN")}
+          onPressOut={() => console.log("PRESS OUT")}
+          onPress={() => {
+            console.log("PRESS COMPLETED!");
+            takePicture(); // This should now finally fire
+          }}
+          android_disableSound={true} // <-- Helps on Android with gesture interference
+          style={({ pressed }) => [
+            styles.captureButton,
+            pressed && { opacity: 0.5 },
+            !isCameraReady && styles.disabledButton,
+          ]}
+          disabled={!isCameraReady}
+        >
+          <View style={styles.captureButtonInner} />
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -174,11 +259,26 @@ const styles = StyleSheet.create({
   camera: {
     width: "100%",
     height: "100%",
+    position: "absolute", // Make camera fill the background
+    top: 0,
+    left: 0,
+    zIndex: -1,
   },
   topButtonContainer: {
     position: "absolute",
     top: 50,
     left: 20,
+    zIndex: 10, // Ensure it's above the camera
+  },
+  bottomButtonsContainer: {
+    position: "absolute",
+    bottom: "10%",
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    zIndex: 100,
+    elevation: 100,
   },
   backButton: {
     backgroundColor: "rgba(0,0,0,0.5)",
@@ -188,14 +288,6 @@ const styles = StyleSheet.create({
   backButtonText: {
     color: "#fff",
     fontSize: 16,
-  },
-  bottomButtonsContainer: {
-    position: "absolute",
-    bottom: 40,
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
   },
   button: {
     backgroundColor: "rgba(255,255,255,0.7)",
@@ -210,13 +302,16 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  disabledButton: {
+    opacity: 0.5,
+  },
   captureButtonInner: {
     width: 60,
     height: 60,
     borderRadius: 30,
     backgroundColor: theme.colorWhite,
     borderWidth: 2,
-    borderColor: theme.colorGreen,
+    borderColor: theme.colorGrey,
   },
   text: {
     fontSize: 16,
