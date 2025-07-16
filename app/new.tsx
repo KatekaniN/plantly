@@ -50,7 +50,7 @@ export default function NewScreen() {
         <Text style={styles.cameraText}>Take a picture with your camera</Text>
         <OnboardingButton
           title="Open Camera"
-          onPress={() => router.push("/camera")} // Navigate to camera screen
+          onPress={() => router.push("/camera")} 
           variant="camera"
         />
       </View>

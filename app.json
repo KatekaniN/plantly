@@ -44,6 +44,12 @@
           "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera to take photos of your plants"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "e2bfa8d9-df7a-4151-8a62-68081b6d258d"
+      }
+    }
   }
 }

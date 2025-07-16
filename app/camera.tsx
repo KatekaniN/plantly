@@ -20,7 +20,7 @@ export default function CameraScreen() {
   // State to manage which camera to use: front or back
   const [facing, setFacing] = useState<CameraType>("back");
 
-  // Reference to the camera component with proper typing
+  // Reference to the camera component with typing
   const cameraRef = useRef<any>(null);
 
   // State to store the captured photo
@@ -72,39 +72,29 @@ export default function CameraScreen() {
     }
   };
 
-  // Function to handle when camera is ready
   const onCameraReady = () => {
     console.log("Camera is ready");
     setCameraReady(true);
   };
 
-  // Function to capture a photo
   const takePicture = async () => {
-    console.log("Take picture button pressed");
-
+   
     if (!cameraRef.current) {
-      console.log("Camera ref is null");
       Alert.alert("Error", "Camera not available");
       return;
     }
 
     if (!isCameraReady) {
-      console.log("Camera is not ready yet");
       Alert.alert("Please wait", "Camera is initializing...");
       return;
     }
 
     try {
-      console.log("Attempting to take picture...");
-
-      // Simplified approach - remove platform-specific logic
       const photo = await cameraRef.current.takePictureAsync({
-        quality: 0.7,
+        quality: 0.7, 
         base64: false,
         exif: false,
       });
-
-      console.log("Photo captured:", photo);
 
       if (photo && photo.uri) {
         setPhoto(photo);
@@ -154,14 +144,6 @@ export default function CameraScreen() {
         >
           <Text style={styles.permissionButtonText}>Grant Camera Access</Text>
         </TouchableOpacity>
-
-        {/* Option to go back instead of granting permission */}
-        <TouchableOpacity
-          style={[styles.permissionButton, styles.secondaryButton]}
-          onPress={() => router.back()}
-        >
-          <Text style={styles.secondaryButtonText}>Go Back</Text>
-        </TouchableOpacity>
       </View>
     );
   }
@@ -177,27 +159,15 @@ export default function CameraScreen() {
         onCameraReady={onCameraReady}
       />
 
-      {/* Back button positioned at the top */}
-      <View style={styles.topButtonContainer}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Text style={styles.backButtonText}>← Back</Text>
-        </TouchableOpacity>
-      </View>
 
       {/* Bottom container with flip and capture buttons */}
       <View style={styles.bottomButtonsContainer}>
         {/* Capture photo */}
         <Pressable
-          onPressIn={() => console.log("PRESS IN")}
-          onPressOut={() => console.log("PRESS OUT")}
           onPress={() => {
-            console.log("PRESS COMPLETED!");
-            takePicture(); // This should now finally fire
+            takePicture(); 
           }}
-          android_disableSound={true} // <-- Helps on Android with gesture interference
+          android_disableSound={true} 
           style={({ pressed }) => [
             styles.captureButton,
             pressed && { opacity: 0.5 },
@@ -259,7 +229,7 @@ const styles = StyleSheet.create({
   camera: {
     width: "100%",
     height: "100%",
-    position: "absolute", // Make camera fill the background
+    position: "absolute",
     top: 0,
     left: 0,
     zIndex: -1,
@@ -268,26 +238,17 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 50,
     left: 20,
-    zIndex: 10, // Ensure it's above the camera
+    zIndex: 10, 
   },
   bottomButtonsContainer: {
     position: "absolute",
-    bottom: "10%",
+    bottom: "18%",
     width: "100%",
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
     zIndex: 100,
     elevation: 100,
-  },
-  backButton: {
-    backgroundColor: "rgba(0,0,0,0.5)",
-    padding: 10,
-    borderRadius: 5,
-  },
-  backButtonText: {
-    color: "#fff",
-    fontSize: 16,
   },
   button: {
     backgroundColor: "rgba(255,255,255,0.7)",
