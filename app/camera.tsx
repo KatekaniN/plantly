@@ -1,191 +1,148 @@
-import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { useState, useEffect, useRef } from "react";
 import {
-  Button,
+  View,
   Text,
   StyleSheet,
-  TouchableOpacity,
-  View,
-  Alert,
   Image,
-  Pressable,
-  Platform,
+  useWindowDimensions,
+  TouchableOpacity,
+  Alert,
 } from "react-native";
-import { useRouter } from "expo-router";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { theme } from "@/theme";
+import { OnboardingButton } from "@/components/OnboardingButton";
+import { useRouter } from "expo-router";
+import * as ImagePicker from "expo-image-picker";
 
-export default function CameraScreen() {
-  // State to manage which camera to use: front or back
-  const [facing, setFacing] = useState<CameraType>("back");
+export default function NewScreen() {
+  const { width } = useWindowDimensions();
+  const imageSize = Math.min(width / 1.1, 400);
+  const router = useRouter();
 
-  // Reference to the camera component with typing
-  const cameraRef = useRef<any>(null);
-
-  // State to store the captured photo
-  const [photo, setPhoto] = useState<any>(null);
-
-  // State to track if camera is ready
-  const [isCameraReady, setCameraReady] = useState(false);
-
-  // Hook to request and track camera permissions
-  const [cameraPermission, requestCameraPermission] = useCameraPermissions();
-
-  // State to track the current permission status ("loading", "granted", "denied", "blocked")
-  const [permissionStatus, setPermissionStatus] = useState("loading");
-
-  const router = useRouter(); // Router hook for navigation
-
-  // Check and update permission status whenever `cameraPermission` changes
-  useEffect(() => {
-    if (cameraPermission === null) {
-      setPermissionStatus("loading");
-    } else if (cameraPermission.granted) {
-      setPermissionStatus("granted");
-    } else if (cameraPermission.canAskAgain) {
-      setPermissionStatus("denied");
-    } else {
-      setPermissionStatus("blocked"); // User selected "Don't ask again"
-    }
-  }, [cameraPermission]);
-
-  // Function to handle requesting camera permission from user
-  const handleRequestPermission = async () => {
-    const permissionResult = await requestCameraPermission();
-
-    if (permissionResult.granted) {
-      setPermissionStatus("granted");
-    } else {
-      // If permission is denied, inform the user and offer option to open settings
-      Alert.alert(
-        "Camera Permission Required",
-        "This app needs camera access to take plant photos. Please enable camera permissions in your device settings.",
-        [
-          { text: "Cancel", style: "cancel" },
-          {
-            text: "Open Settings",
-            onPress: () => console.log("Open settings"),
-          },
-        ]
-      );
-    }
-  };
-
-  const onCameraReady = () => {
-    console.log("Camera is ready");
-    setCameraReady(true);
-  };
-
-  const takePicture = async () => {
-   
-    if (!cameraRef.current) {
-      Alert.alert("Error", "Camera not available");
-      return;
-    }
-
-    if (!isCameraReady) {
-      Alert.alert("Please wait", "Camera is initializing...");
-      return;
-    }
-
+  // Function to pick image from gallery
+  const pickImageFromGallery = async () => {
     try {
-      const photo = await cameraRef.current.takePictureAsync({
-        quality: 0.7, 
-        base64: false,
-        exif: false,
+      // Request permission
+      const permissionResult =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (permissionResult.granted === false) {
+        Alert.alert(
+          "Permission required",
+          "Permission to access camera roll is required!"
+        );
+        return;
+      }
+
+      // Launch image picker
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
       });
 
-      if (photo && photo.uri) {
-        setPhoto(photo);
-        Alert.alert("Success", "Photo captured successfully!");
+      if (!result.canceled && result.assets[0]) {
+        const imageUri = result.assets[0].uri;
+        console.log("Selected image URI:", imageUri);
+
+        // Navigate to plant identification with the image URI
+        router.push({
+          pathname: "/plantIdentification",
+          params: { imageUri },
+        });
+      }
+    } catch (error) {
+      console.error("Error picking image:", error);
+      Alert.alert("Error", "Failed to pick image from gallery");
+    }
+  };
+
+  // Function to take photo with camera
+  const takePhotoWithCamera = async () => {
+    try {
+      // Request permission
+      const permissionResult =
+        await ImagePicker.requestCameraPermissionsAsync();
+
+      if (permissionResult.granted === false) {
+        Alert.alert(
+          "Permission required",
+          "Permission to access camera is required!"
+        );
+        return;
+      }
+
+      // Launch camera
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        const imageUri = result.assets[0].uri;
+        console.log("Captured image URI:", imageUri);
 
         router.push({
           pathname: "/plantIdentification",
-          params: { photoUri: photo.uri },
+          params: { imageUri },
         });
-      } else {
-        throw new Error("No photo URI received");
       }
     } catch (error) {
-      console.error("Error taking picture:", error);
-      const errorMessage =
-        error && typeof error === "object" && "message" in error
-          ? (error as { message: string }).message
-          : String(error);
-      Alert.alert("Error", `Failed to take picture: ${errorMessage}`);
+      console.error("Error taking photo:", error);
+      Alert.alert("Error", "Failed to take photo");
     }
   };
 
-  // If permission status is loading, show loading screen
-  if (permissionStatus === "loading") {
-    return (
-      <View style={[styles.container, { backgroundColor: theme.colorGreen }]}>
-        <Text style={styles.message}>Loading camera...</Text>
-      </View>
-    );
-  }
-
-  // If permission is denied or blocked, show permission request screen
-  if (permissionStatus === "denied" || permissionStatus === "blocked") {
-    return (
-      <View style={[styles.container, { backgroundColor: "#fff" }]}>
-        <Text style={styles.message}>
-          We need your permission to use the camera
-        </Text>
-        <Text style={styles.submessage}>
-          This allows you to take photos of your plants for identification
-        </Text>
-
-        {/* Button to request camera permission */}
-        <TouchableOpacity
-          style={styles.permissionButton}
-          onPress={handleRequestPermission}
-        >
-          <Text style={styles.permissionButtonText}>Grant Camera Access</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-
-  // If permission is granted, show the camera interface
   return (
-    <View style={styles.container} pointerEvents="auto">
-      {/* Camera view using the selected facing direction */}
-      <CameraView
-        style={styles.camera}
-        facing={facing}
-        ref={cameraRef}
-        onCameraReady={onCameraReady}
-      />
+    <View style={styles.container}>
+      {/* Header section */}
+      <View style={styles.headerContainer}>
+        <Text style={styles.title}>
+          Add your new green friend
+          <FontAwesome6
+            name="seedling"
+            size={24}
+            color={theme.colorLeafyGreen}
+            style={{ marginLeft: 8 }}
+          />
+        </Text>
+        <Text style={styles.subtitle}>Upload a picture from your gallery</Text>
+      </View>
 
+      {/* Upload section */}
+      <TouchableOpacity
+        style={[styles.uploadContainer, { width: imageSize }]}
+        onPress={pickImageFromGallery} // Updated this line
+      >
+        <Image
+          source={require("@/assets/images/upload-image.png")}
+          style={[styles.uploadImage, { width: imageSize, height: imageSize }]}
+          resizeMode="contain"
+        />
+      </TouchableOpacity>
 
-      {/* Bottom container with flip and capture buttons */}
-      <View style={styles.bottomButtonsContainer}>
-        {/* Capture photo */}
-        <Pressable
-          onPress={() => {
-            takePicture(); 
-          }}
-          android_disableSound={true} 
-          style={({ pressed }) => [
-            styles.captureButton,
-            pressed && { opacity: 0.5 },
-            !isCameraReady && styles.disabledButton,
-          ]}
-          disabled={!isCameraReady}
-        >
-          <View style={styles.captureButtonInner} />
-        </Pressable>
+      {/* Bottom section */}
+      <View style={styles.bottomContainer}>
+        <Text style={styles.orText}>Or</Text>
+        <Text style={styles.cameraText}>Take a picture with your camera</Text>
+        <OnboardingButton
+          title="Open Camera"
+          onPress={takePhotoWithCamera} // Updated this line
+          variant="camera"
+        />
       </View>
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
     alignItems: "center",
+    backgroundColor: theme.colorWhite || "#fff",
+    paddingHorizontal: 20,
+    paddingTop: 60,
+    justifyContent: "space-between",
   },
   message: {
     fontSize: 20,
@@ -237,7 +194,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 50,
     left: 20,
-    zIndex: 10, 
+    zIndex: 10,
   },
   bottomButtonsContainer: {
     position: "absolute",
@@ -276,5 +233,63 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 16,
     color: "#000",
+  },
+  headerContainer: {
+    alignItems: "center",
+    marginBottom: 40,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: theme.colorDarkGreen || "#2E7D32",
+    textAlign: "center",
+    marginBottom: 12,
+    lineHeight: 34,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: theme.colorGrey || "#666",
+    textAlign: "center",
+    fontWeight: "400",
+  },
+  uploadContainer: {
+    alignSelf: "center",
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: "#E8F5E8",
+    borderStyle: "dashed",
+    backgroundColor: "#F8FDF8",
+    padding: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    marginVertical: 20,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  uploadImage: {
+    borderRadius: 15,
+  },
+  bottomContainer: {
+    alignItems: "center",
+    paddingBottom: 40,
+  },
+  orText: {
+    fontSize: 16,
+    color: theme.colorGrey || "#666",
+    fontWeight: "500",
+    marginBottom: 16,
+  },
+  cameraText: {
+    fontSize: 16,
+    color: theme.colorDarkGreen || "#2E7D32",
+    textAlign: "center",
+    marginBottom: 24,
+    fontWeight: "500",
   },
 });

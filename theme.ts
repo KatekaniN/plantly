@@ -10,4 +10,10 @@ export const theme = {
   colorBeige: "#EFE0C1",
   colorGrey: "#948e8e",
   colorLeafyGreen: "#206a42",
+  fontFamily: {
+    regular: "Inter-Regular",
+    medium: "Inter-Medium",
+    bold: "Inter-Bold",
+    semiBold: "Inter-SemiBold",
+  },
 };

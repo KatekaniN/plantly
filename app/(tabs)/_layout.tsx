@@ -34,7 +34,7 @@ export default function Layout() {
             <Entypo name="leaf" size={size} color={color} />
           ),
           headerRight: () => (
-            <Link href="/new" asChild>
+            <Link href="/camera" asChild>
               <TouchableOpacity style={{ marginRight: 10 }} hitSlop={20}>
                 <AntDesign
                   name="pluscircle"

@@ -103,12 +103,10 @@ type PlantIdentificationStore = {
   setLoading: (loading: boolean) => void;
 };
 
-// ===== PLANTNET API CONFIGURATION =====
-const PLANTNET_API_KEY = "2b10AiFkzcaToQc4itaO6wd4O"; // Get from https://my.plantnet.org/
-const PLANTNET_PROJECT = "weurope"; // Options: 'weurope', 'the-flora-of-china', 'k-world-flora'
+const PLANTNET_API_KEY = "2b10AiFkzcaToQc4itaO6wd4O";
+const PLANTNET_PROJECT = "weurope";
 const PLANTNET_BASE_URL = "https://my-api.plantnet.org/v2/identify";
 
-// ===== API FUNCTIONS =====
 async function identifyPlantWithPlantNet(
   imageUri: string
 ): Promise<PlantIdentificationResult[]> {
@@ -125,16 +123,10 @@ async function identifyPlantWithPlantNet(
       name: "plant_image.jpg",
     } as any);
 
+    // Only add organs - remove everything else that's causing errors
     formData.append("organs", "leaf");
-    formData.append("organs", "flower");
-    formData.append("organs", "fruit");
 
-    formData.append(
-      "modifiers",
-      JSON.stringify(["crops_fast", "similar_images"])
-    );
-    formData.append("plant-details", JSON.stringify(["common_names"]));
-
+    // Simple URL without extra parameters
     const url = `${PLANTNET_BASE_URL}/${PLANTNET_PROJECT}?api-key=${PLANTNET_API_KEY}`;
 
     const response = await fetch(url, {
@@ -146,13 +138,16 @@ async function identifyPlantWithPlantNet(
     });
 
     if (!response.ok) {
-      const errorData: PlantNetError = await response.json();
+      const errorText = await response.text();
+      console.log("PlantNet API response:", errorText);
       throw new Error(
-        `PlantNet API error: ${errorData.message || response.statusText}`
+        `PlantNet API error: ${response.status} - ${response.statusText}`
       );
     }
 
     const data: PlantNetApiResponse = await response.json();
+    console.log("PlantNet API success:", data);
+
     const filteredResults = data.results.filter(
       (result: PlantIdentificationResult) => result.score > 0.1
     );
@@ -289,7 +284,9 @@ export const usePlantIdentificationStore = create(
     {
       name: "plantly-identification-store",
       storage: createJSONStorage(() => AsyncStorage),
-      partialize: (state: PlantIdentificationStore) => ({ myPlants: state.myPlants }),
+      partialize: (state: PlantIdentificationStore) => ({
+        myPlants: state.myPlants,
+      }),
     }
   )
 );
