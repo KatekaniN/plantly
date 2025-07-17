@@ -12,7 +12,6 @@ import {
   Pressable,
   Platform,
 } from "react-native";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useRouter } from "expo-router";
 import { theme } from "@/theme";
 
@@ -101,7 +100,7 @@ export default function CameraScreen() {
         Alert.alert("Success", "Photo captured successfully!");
 
         router.push({
-          pathname: "/plant-identification",
+          pathname: "/plantIdentification",
           params: { photoUri: photo.uri },
         });
       } else {

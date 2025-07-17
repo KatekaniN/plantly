@@ -1,8 +1,7 @@
 {
   "expo": {
-    "name": "plantly",
-    "slug": "plantly",
-    "scheme": "plantly",
+    "name": "Plantly",
+    "scheme": "Plantly",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -50,6 +49,7 @@
       "eas": {
         "projectId": "e2bfa8d9-df7a-4151-8a62-68081b6d258d"
       }
-    }
+    },
+    "owner": "knyamandi99"
   }
 }
