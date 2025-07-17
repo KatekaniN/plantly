@@ -15,7 +15,7 @@ import * as ImagePicker from "expo-image-picker";
 
 export default function NewScreen() {
   const { width } = useWindowDimensions();
-  const imageSize = Math.min(width / 1.1, 300); // 1.1, 400
+  const imageSize = Math.min(width / 3, 300); // 1.1, 400
   const router = useRouter();
 
   const pickImageFromGallery = async () => {
