@@ -104,7 +104,7 @@ type PlantIdentificationStore = {
 };
 
 // ===== PLANTNET API CONFIGURATION =====
-const PLANTNET_API_KEY = "YOUR_API_KEY_HERE"; // Get from https://my.plantnet.org/
+const PLANTNET_API_KEY = "2b10AiFkzcaToQc4itaO6wd4O"; // Get from https://my.plantnet.org/
 const PLANTNET_PROJECT = "weurope"; // Options: 'weurope', 'the-flora-of-china', 'k-world-flora'
 const PLANTNET_BASE_URL = "https://my-api.plantnet.org/v2/identify";
 
@@ -112,7 +112,7 @@ const PLANTNET_BASE_URL = "https://my-api.plantnet.org/v2/identify";
 async function identifyPlantWithPlantNet(
   imageUri: string
 ): Promise<PlantIdentificationResult[]> {
-  if (!PLANTNET_API_KEY || PLANTNET_API_KEY === "YOUR_API_KEY_HERE") {
+  if (!PLANTNET_API_KEY) {
     throw new Error("PlantNet API key not configured");
   }
 
