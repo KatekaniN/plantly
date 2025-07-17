@@ -256,10 +256,10 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     borderRadius: 20,
     borderWidth: 2,
-    borderColor: "#E8F5E8",
+    borderColor: theme.colorBeige,
     borderStyle: "dashed",
-    backgroundColor: "#F8FDF8",
-    padding: 20,
+    backgroundColor: theme.colorBeige,
+    padding: 5,
     alignItems: "center",
     justifyContent: "center",
     marginVertical: 20,
@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   uploadImage: {
-    borderRadius: 15,
+    borderRadius: 20,
   },
   bottomContainer: {
     alignItems: "center",
