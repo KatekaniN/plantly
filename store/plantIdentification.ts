@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as FileSystem from "expo-file-system";
 
 export interface PlantNetSpecies {
   scientificNameWithoutAuthor: string;
@@ -115,55 +116,81 @@ async function identifyPlantWithPlantNet(
   }
 
   try {
-    const formData = new FormData();
+    // Use 'all' project like your working Node.js code
+    const url = `${PLANTNET_BASE_URL}/all?api-key=${PLANTNET_API_KEY}`;
 
-    formData.append("images", {
-      uri: imageUri,
-      type: "image/jpeg",
-      name: "plant_image.jpg",
-    } as any);
+    console.log("🔍 Starting plant identification...");
+    console.log("📷 Image URI:", imageUri);
+    console.log("🌐 API URL:", url);
 
-    // Only add organs - remove everything else that's causing errors
-    formData.append("organs", "leaf");
-
-    // Simple URL without extra parameters
-    const url = `${PLANTNET_BASE_URL}/${PLANTNET_PROJECT}?api-key=${PLANTNET_API_KEY}`;
-
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "multipart/form-data",
+    const response = await FileSystem.uploadAsync(url, imageUri, {
+      fieldName: "images",
+      httpMethod: "POST",
+      uploadType: FileSystem.FileSystemUploadType.MULTIPART,
+      parameters: {
+        // Match your working Node.js format - single organ
+        organs: "flower", // or "leaf" depending on your image
       },
-      body: formData,
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.log("PlantNet API response:", errorText);
-      throw new Error(
-        `PlantNet API error: ${response.status} - ${response.statusText}`
-      );
+    console.log("📡 API Response Status:", response.status);
+    console.log("📄 API Response Body:", response.body);
+
+    if (response.status !== 200) {
+      console.error("❌ API Error Response:", response.body);
+      throw new Error(`PlantNet API error: ${response.status}`);
     }
 
-    const data: PlantNetApiResponse = await response.json();
-    console.log("PlantNet API success:", data);
+    // Add safety check for response body
+    if (!response.body) {
+      throw new Error("Empty response from PlantNet API");
+    }
+
+    let data: PlantNetApiResponse;
+    try {
+      data = JSON.parse(response.body);
+    } catch (parseError) {
+      console.error("❌ JSON Parse Error:", parseError);
+      console.error("Raw response:", response.body);
+      throw new Error("Invalid response format from PlantNet API");
+    }
+
+    console.log("✅ PlantNet API success:", data);
+    console.log("🔢 Number of results:", data.results?.length || 0);
+
+    // Add safety check for results
+    if (!data.results || !Array.isArray(data.results)) {
+      console.log("⚠️ No results array in response");
+      return [];
+    }
 
     const filteredResults = data.results.filter(
       (result: PlantIdentificationResult) => result.score > 0.1
     );
 
+    console.log("✨ Filtered results count:", filteredResults.length);
+
     return filteredResults;
   } catch (error) {
-    console.error("PlantNet identification error:", error);
+    console.error("🚨 PlantNet identification error:", error);
 
-    if (
-      error instanceof TypeError &&
-      error.message.includes("Network request failed")
-    ) {
-      throw new Error("Network error. Please check your internet connection.");
+    if (error instanceof Error) {
+      if (error.message.includes("API key")) {
+        throw new Error("API configuration error. Please contact support.");
+      } else if (error.message.includes("401")) {
+        throw new Error("Invalid API key. Please check configuration.");
+      } else if (error.message.includes("429")) {
+        throw new Error("Too many requests. Please try again later.");
+      } else if (error.message.includes("Network")) {
+        throw new Error(
+          "Network error. Please check your internet connection."
+        );
+      }
     }
 
-    throw error;
+    throw new Error(
+      `Failed to identify plant: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
   }
 }
 
@@ -197,11 +224,9 @@ export function generateDefaultCareDetails(
   return defaultCare;
 }
 
-// ===== ZUSTAND STORE - SIMPLIFIED TYPING =====
 export const usePlantIdentificationStore = create(
   persist(
     (set, get) => ({
-      // State
       currentImageUri: null as string | null,
       identificationResults: [] as PlantIdentificationResult[],
       selectedPlant: null as PlantIdentificationResult | null,
@@ -210,17 +235,34 @@ export const usePlantIdentificationStore = create(
       error: null as string | null,
       myPlants: [] as PlantProfile[],
 
-      // Actions
       setCurrentImage: (uri: string): void => {
         set({ currentImageUri: uri });
       },
 
       identifyPlant: async (imageUri: string): Promise<void> => {
+        console.log("🚀 Starting plant identification process...");
         set({ isLoading: true, error: null });
 
         try {
+          // Validate image URI
+          if (!imageUri) {
+            throw new Error("No image provided for identification");
+          }
+
+          // Check if file exists (for local files)
+          if (imageUri.startsWith("file://")) {
+            const fileInfo = await FileSystem.getInfoAsync(imageUri);
+            if (!fileInfo.exists) {
+              throw new Error("Image file not found");
+            }
+            console.log("📁 Image file exists, size:", fileInfo.size);
+          }
+
           const identificationResults =
             await identifyPlantWithPlantNet(imageUri);
+
+          console.log("🎉 Identification completed successfully");
+
           set({
             identificationResults,
             isLoading: false,
@@ -230,12 +272,15 @@ export const usePlantIdentificationStore = create(
                 : null,
           });
         } catch (error) {
+          console.error("💥 Identification failed:", error);
           const errorMessage =
             error instanceof Error ? error.message : "Failed to identify plant";
+
           set({
             error: errorMessage,
             isLoading: false,
             identificationResults: [],
+            selectedPlant: null,
           });
         }
       },

@@ -12,6 +12,8 @@ import { theme } from "@/theme";
 import { OnboardingButton } from "@/components/OnboardingButton";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system";
+import { MediaType } from "expo-media-library";
 
 export default function NewScreen() {
   const { width } = useWindowDimensions();
@@ -32,9 +34,9 @@ export default function NewScreen() {
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: "Images" as any,
         allowsEditing: true,
-        aspect: [1, 1],
+        aspect: [4, 3],
         quality: 0.8,
       });
 
@@ -42,14 +44,36 @@ export default function NewScreen() {
         const imageUri = result.assets[0].uri;
         console.log("Selected image URI:", imageUri);
 
+        const persistentUri = await saveImageToPersistentLocation(imageUri);
+
         router.push({
           pathname: "/plantIdentification",
-          params: { imageUri },
+          params: { imageUri: persistentUri },
         });
       }
     } catch (error) {
       console.error("Error picking image:", error);
       Alert.alert("Error", "Failed to pick image from gallery");
+    }
+  };
+
+  const saveImageToPersistentLocation = async (
+    imageUri: string
+  ): Promise<string> => {
+    try {
+      const fileName = imageUri.split("/").pop(); // Extract the file name
+      const newPath = `${FileSystem.documentDirectory}${fileName}`; // Save to document directory
+
+      await FileSystem.copyAsync({
+        from: imageUri,
+        to: newPath,
+      });
+
+      console.log("Image saved to:", newPath);
+      return newPath;
+    } catch (error) {
+      console.error("Failed to save image to persistent location:", error);
+      throw error;
     }
   };
 
@@ -66,20 +90,21 @@ export default function NewScreen() {
         return;
       }
 
-      // Launch camera
       const result = await ImagePicker.launchCameraAsync({
         allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
+        aspect: [4, 3],
+        quality: 1,
       });
 
       if (!result.canceled && result.assets[0]) {
         const imageUri = result.assets[0].uri;
         console.log("Captured image URI:", imageUri);
 
+        const persistentUri = await saveImageToPersistentLocation(imageUri);
+
         router.push({
           pathname: "/plantIdentification",
-          params: { imageUri },
+          params: { imageUri: persistentUri },
         });
       }
     } catch (error) {
@@ -108,7 +133,7 @@ export default function NewScreen() {
         <TouchableOpacity
           style={[
             styles.uploadContainer,
-            { width: imageSize, height: imageSize },
+            { width: imageSize * 5, height: imageSize * 5 },
           ]}
           onPress={pickImageFromGallery}
         >
@@ -116,7 +141,7 @@ export default function NewScreen() {
             source={require("@/assets/images/upload-image.png")}
             style={[
               styles.uploadImage,
-              { width: imageSize * 0.8, height: imageSize * 0.8 },
+              { width: imageSize * 3.5, height: imageSize * 3 },
             ]}
             resizeMode="contain"
           />
@@ -173,10 +198,9 @@ const styles = StyleSheet.create({
     padding: 15,
     alignItems: "center",
     justifyContent: "center",
-    borderColor: "#BEC3B6",
-    borderWidth: 1,
   },
   uploadImage: {
+    bottom: "30%",
     borderRadius: 15,
   },
   bottomContainer: {

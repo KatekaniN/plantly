@@ -31,11 +31,7 @@ const PlantIdentificationScreen: React.FC = () => {
   console.log("Received params:", params);
   console.log("Extracted imageUri:", imageUri);
 
-  // Only use fallback for development/testing
-  const fallbackImageUri =
-    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=400&fit=crop";
-  console.log("imageUri:", imageUri);
-  const finalImageUri = imageUri || fallbackImageUri;
+  const finalImageUri = imageUri;
 
   const {
     identificationResults,
