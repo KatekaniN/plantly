@@ -127,7 +127,7 @@ async function identifyPlantWithPlantNet(
       httpMethod: "POST",
       uploadType: FileSystem.FileSystemUploadType.MULTIPART,
       parameters: {
-        organs: "flower, leaf", 
+        organs: "flower", 
       },
     });
 
