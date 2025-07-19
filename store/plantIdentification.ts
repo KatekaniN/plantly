@@ -116,7 +116,6 @@ async function identifyPlantWithPlantNet(
   }
 
   try {
-    // Use 'all' project like your working Node.js code
     const url = `${PLANTNET_BASE_URL}/all?api-key=${PLANTNET_API_KEY}`;
 
     console.log("🔍 Starting plant identification...");
@@ -128,8 +127,7 @@ async function identifyPlantWithPlantNet(
       httpMethod: "POST",
       uploadType: FileSystem.FileSystemUploadType.MULTIPART,
       parameters: {
-        // Match your working Node.js format - single organ
-        organs: "flower", // or "leaf" depending on your image
+        organs: "flower, leaf", 
       },
     });
 
