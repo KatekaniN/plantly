@@ -109,88 +109,110 @@ const PLANTNET_PROJECT = "weurope";
 const PLANTNET_BASE_URL = "https://my-api.plantnet.org/v2/identify";
 
 async function identifyPlantWithPlantNet(
-  imageUri: string
+imageUri: string
 ): Promise<PlantIdentificationResult[]> {
-  if (!PLANTNET_API_KEY) {
-    throw new Error("PlantNet API key not configured");
-  }
+if (!PLANTNET_API_KEY) {
+  throw new Error("PlantNet API key not configured");
+}
 
+// Try different organ types in order of success probability
+const organStrategies = [
+  "leaf",
+  "flower", 
+  "fruit",
+  "bark"
+];
+
+let lastError: Error | null = null;
+
+// Try each organ strategy
+for (const organ of organStrategies) {
   try {
+    console.log(`🌿 Trying identification with organ: ${organ}`);
+    
     const url = `${PLANTNET_BASE_URL}/all?api-key=${PLANTNET_API_KEY}`;
-
-    console.log("🔍 Starting plant identification...");
-    console.log("📷 Image URI:", imageUri);
     console.log("🌐 API URL:", url);
+    console.log("📷 Image URI:", imageUri);
+
+    // Validate image exists before API call
+    const fileInfo = await FileSystem.getInfoAsync(imageUri);
+    if (!fileInfo.exists) {
+      throw new Error("Image file not found before API call");
+    }
+    
+    console.log("📁 Image file validated - Size:", fileInfo.size, "bytes");
 
     const response = await FileSystem.uploadAsync(url, imageUri, {
       fieldName: "images",
       httpMethod: "POST",
       uploadType: FileSystem.FileSystemUploadType.MULTIPART,
       parameters: {
-        organs: "flower", 
+        organs: organ, // Try one organ at a time
+      },
+      headers: {
+        'Accept': 'application/json',
       },
     });
 
-    console.log("📡 API Response Status:", response.status);
-    console.log("📄 API Response Body:", response.body);
+    console.log(`📡 API Response Status for ${organ}:`, response.status);
 
-    if (response.status !== 200) {
-      console.error("❌ API Error Response:", response.body);
-      throw new Error(`PlantNet API error: ${response.status}`);
-    }
-
-    // Add safety check for response body
-    if (!response.body) {
-      throw new Error("Empty response from PlantNet API");
-    }
-
-    let data: PlantNetApiResponse;
-    try {
-      data = JSON.parse(response.body);
-    } catch (parseError) {
-      console.error("❌ JSON Parse Error:", parseError);
-      console.error("Raw response:", response.body);
-      throw new Error("Invalid response format from PlantNet API");
-    }
-
-    console.log("✅ PlantNet API success:", data);
-    console.log("🔢 Number of results:", data.results?.length || 0);
-
-    // Add safety check for results
-    if (!data.results || !Array.isArray(data.results)) {
-      console.log("⚠️ No results array in response");
-      return [];
-    }
-
-    const filteredResults = data.results.filter(
-      (result: PlantIdentificationResult) => result.score > 0.1
-    );
-
-    console.log("✨ Filtered results count:", filteredResults.length);
-
-    return filteredResults;
-  } catch (error) {
-    console.error("🚨 PlantNet identification error:", error);
-
-    if (error instanceof Error) {
-      if (error.message.includes("API key")) {
-        throw new Error("API configuration error. Please contact support.");
-      } else if (error.message.includes("401")) {
-        throw new Error("Invalid API key. Please check configuration.");
-      } else if (error.message.includes("429")) {
-        throw new Error("Too many requests. Please try again later.");
-      } else if (error.message.includes("Network")) {
-        throw new Error(
-          "Network error. Please check your internet connection."
-        );
+    if (response.status === 200) {
+      if (!response.body) {
+        console.log(`⚠️ Empty response for ${organ}`);
+        continue;
       }
+
+      let data: PlantNetApiResponse;
+      try {
+        data = JSON.parse(response.body);
+      } catch (parseError) {
+        console.error(`❌ JSON Parse Error for ${organ}:`, parseError);
+        continue;
+      }
+
+      console.log(`✅ PlantNet API success for ${organ}:`, data);
+      console.log("🔢 Number of results:", data.results?.length || 0);
+
+      if (data.results && Array.isArray(data.results) && data.results.length > 0) {
+        const filteredResults = data.results.filter(
+          (result: PlantIdentificationResult) => result.score > 0.01 // Very low threshold
+        );
+
+        if (filteredResults.length > 0) {
+          console.log(`🎉 Found ${filteredResults.length} results with ${organ}`);
+          return filteredResults;
+        }
+      }
+      
+      console.log(`⚠️ No results found for ${organ}, trying next...`);
+    } else if (response.status === 404) {
+      console.log(`🔍 No species found for ${organ}, trying next organ...`);
+      lastError = new Error(`No plant species found with ${organ} analysis`);
+      continue;
+    } else {
+      // Handle other errors
+      console.error(`❌ API Error for ${organ}:`, response.status, response.body);
+      lastError = new Error(`API error ${response.status}: ${response.body}`);
+      continue;
     }
 
-    throw new Error(
-      `Failed to identify plant: ${error instanceof Error ? error.message : "Unknown error"}`
-    );
+  } catch (error) {
+    console.error(`🚨 Error trying ${organ}:`, error);
+    lastError = error instanceof Error ? error : new Error(`Unknown error with ${organ}`);
+    continue;
   }
 }
+
+// If we get here, all organ strategies failed
+if (lastError?.message.includes("No plant species found")) {
+  throw new Error("No plants could be identified in this image. Try taking a clearer photo focusing on leaves, flowers, or other plant parts.");
+}
+
+throw new Error(
+  lastError?.message || "Failed to identify plant with any detection method"
+);
+}
+
 
 export function generateDefaultCareDetails(
   plant: PlantIdentificationResult

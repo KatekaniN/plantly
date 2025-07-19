@@ -62,8 +62,8 @@ export default function NewScreen() {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: "Images" as any,
         allowsEditing: true,
-        aspect: [4, 3],
-        quality: 0.8,
+        aspect: [1, 1], // Square aspect ratio works better for plant identification
+        quality: 0.9, // Higher quality for better identification
         allowsMultipleSelection: false,
       });
 
@@ -77,13 +77,9 @@ export default function NewScreen() {
           result.assets[0].height
         );
 
-        await validateAndProcessImage(originalUri);
-
-        const persistentUri = await saveImageToPersistentLocation(originalUri);
-
-        await validateAndProcessImage(persistentUri);
-
-        console.log("✅ Final image URI for identification:", persistentUri);
+        // Process and validate image
+        const processedUri = await processImageForIdentification(originalUri);
+        const persistentUri = await saveImageToPersistentLocation(processedUri);
 
         router.push({
           pathname: "/plantIdentification",
@@ -98,6 +94,7 @@ export default function NewScreen() {
       );
     }
   };
+
   const saveImageToPersistentLocation = async (
     imageUri: string
   ): Promise<string> => {
@@ -145,24 +142,17 @@ export default function NewScreen() {
 
       const result = await ImagePicker.launchCameraAsync({
         allowsEditing: true,
-        aspect: [4, 3],
-        quality: 0.8, // Match gallery quality
+        aspect: [1, 1], // Square aspect ratio
+        quality: 0.9, // Higher quality
       });
 
       if (!result.canceled && result.assets[0]) {
         const originalUri = result.assets[0].uri;
         console.log("📸 Captured image URI:", originalUri);
 
-        // Validate the captured image
-        await validateAndProcessImage(originalUri);
-
-        // Save to persistent location
-        const persistentUri = await saveImageToPersistentLocation(originalUri);
-
-        // Double-check the persistent file
-        await validateAndProcessImage(persistentUri);
-
-        console.log("✅ Final camera image URI:", persistentUri);
+        // Process and validate image
+        const processedUri = await processImageForIdentification(originalUri);
+        const persistentUri = await saveImageToPersistentLocation(processedUri);
 
         router.push({
           pathname: "/plantIdentification",
@@ -175,6 +165,33 @@ export default function NewScreen() {
         "Error",
         `Failed to take photo: ${error instanceof Error ? error.message : "Unknown error"}`
       );
+    }
+  };
+
+  const processImageForIdentification = async (
+    imageUri: string
+  ): Promise<string> => {
+    try {
+      console.log("🔄 Processing image for identification...");
+
+      // For now, just validate the image
+      // You could add image compression/resizing here if needed
+      const fileInfo = await FileSystem.getInfoAsync(imageUri);
+
+      if (!fileInfo.exists) {
+        throw new Error("Image file does not exist");
+      }
+
+      if (fileInfo.size && fileInfo.size > 5 * 1024 * 1024) {
+        // 5MB
+        console.log("⚠️ Large image detected, may need compression");
+      }
+
+      console.log("✅ Image processed successfully");
+      return imageUri;
+    } catch (error) {
+      console.error("❌ Image processing failed:", error);
+      throw error;
     }
   };
 
