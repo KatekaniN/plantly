@@ -79,7 +79,7 @@ const PlantIdentificationScreen: React.FC = () => {
 
       const defaultCareDetails = generateDefaultCareDetails(selectedPlant);
       setCareDetails(defaultCareDetails);
-      router.push("/plantDetailsReview");
+      router.push("/plantdetailsreview");
     } else {
       console.warn("⚠️ No plant selected for continuation");
     }
