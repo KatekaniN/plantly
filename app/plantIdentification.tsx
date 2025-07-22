@@ -77,8 +77,8 @@ const handleContinue = (): void => {
     const defaultCareDetails = generateDefaultCareDetails(selectedPlant);
     setCareDetails(defaultCareDetails);
     
-    // Navigate to the plant details review screen
-    router.push("/plantdetailsreview");
+
+    router.push("/plantDetailsReview");
   } else {
     console.warn("⚠️ No plant selected for continuation");
   }
