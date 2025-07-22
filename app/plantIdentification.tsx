@@ -392,6 +392,7 @@ genusName: {
   color: "#888888",
 },
 buttonContainer: {
+  bottom: "2%",
   flexDirection: "row",
   gap: 12,
   paddingTop: 8,
