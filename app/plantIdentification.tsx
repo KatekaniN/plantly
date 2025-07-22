@@ -1,108 +1,259 @@
 import React, { useEffect } from "react";
 import {
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
-  ScrollView,
-  ActivityIndicator,
-  StyleSheet,
-  SafeAreaView,
-  Dimensions,
+View,
+Text,
+Image,
+TouchableOpacity,
+ScrollView,
+ActivityIndicator,
+StyleSheet,
+SafeAreaView,
+Dimensions,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
-  usePlantIdentificationStore,
-  PlantIdentificationResult,
-  generateDefaultCareDetails,
+usePlantIdentificationStore,
+PlantIdentificationResult,
+generateDefaultCareDetails,
 } from "../store/plantIdentification";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
 const PlantIdentificationScreen: React.FC = () => {
-  const params = useLocalSearchParams();
-  const router = useRouter();
+const params = useLocalSearchParams();
+const router = useRouter();
 
-  const imageUri = Array.isArray(params.imageUri)
-    ? params.imageUri[0]
-    : params.imageUri;
+const imageUri = Array.isArray(params.imageUri)
+  ? params.imageUri[0]
+  : params.imageUri;
 
-  console.log("Received params:", params);
-  console.log("Extracted imageUri:", imageUri);
+console.log("Received params:", params);
+console.log("Extracted imageUri:", imageUri);
 
-  const finalImageUri = imageUri;
+const finalImageUri = imageUri;
 
-  const {
-    identificationResults,
-    selectedPlant,
-    isLoading,
-    error,
-    identifyPlant,
-    selectPlant,
-    setCurrentImage,
-    clearCurrentIdentification,
-    setCareDetails,
-  } = usePlantIdentificationStore();
+const {
+  identificationResults,
+  selectedPlant,
+  isLoading,
+  error,
+  identifyPlant,
+  selectPlant,
+  setCurrentImage,
+  clearCurrentIdentification,
+  setCareDetails,
+} = usePlantIdentificationStore();
 
-  useEffect(() => {
-    if (!imageUri) {
-      router.back();
-      console.warn("No image URI provided, redirecting back.");
-      return;
-    }
-
-    const initializeIdentification = async (): Promise<void> => {
-      try {
-        setCurrentImage(finalImageUri);
-        await identifyPlant(finalImageUri);
-      } catch (error) {
-        console.error("Failed to identify plant:", error);
-      }
-    };
-
-    initializeIdentification();
-  }, [finalImageUri, setCurrentImage, identifyPlant, router]);
-
-  const handleRetakePhoto = (): void => {
-    clearCurrentIdentification();
+useEffect(() => {
+  if (!imageUri) {
     router.back();
-  };
+    console.warn("No image URI provided, redirecting back.");
+    return;
+  }
 
-  const handleContinue = (): void => {
-    if (selectedPlant) {
-      const defaultCareDetails = generateDefaultCareDetails(selectedPlant);
-      setCareDetails(defaultCareDetails);
-      router.push({
-        pathname: "/plantdetailsreview",
-      });
+  const initializeIdentification = async (): Promise<void> => {
+    try {
+      setCurrentImage(finalImageUri);
+      await identifyPlant(finalImageUri);
+    } catch (error) {
+      console.error("Failed to identify plant:", error);
     }
   };
 
-  const handleSelectPlant = (plant: PlantIdentificationResult): void => {
-    selectPlant(plant);
-  };
+  initializeIdentification();
+}, [finalImageUri, setCurrentImage, identifyPlant, router]);
 
-  const formatConfidenceScore = (score: number): string => {
-    return `${Math.round(score * 100)}%`;
-  };
+const handleRetakePhoto = (): void => {
+  clearCurrentIdentification();
+  router.back();
+};
 
-  const truncateText = (text: string, maxLength: number): string => {
-    return text.length > maxLength
-      ? `${text.substring(0, maxLength)}...`
-      : text;
-  };
+const handleContinue = (): void => {
+  if (selectedPlant) {
+    console.log("🚀 Navigating to plant details review...");
+    console.log("Selected plant:", selectedPlant.species.scientificNameWithoutAuthor);
+    
+    const defaultCareDetails = generateDefaultCareDetails(selectedPlant);
+    setCareDetails(defaultCareDetails);
+    
+    // Navigate to the plant details review screen
+    router.push("/plantdetailsreview");
+  } else {
+    console.warn("⚠️ No plant selected for continuation");
+  }
+};
 
-  if (error) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.imageContainer}>
-          <Image source={{ uri: finalImageUri }} style={styles.capturedImage} />
+const handleSelectPlant = (plant: PlantIdentificationResult): void => {
+  console.log("🌱 Plant selected:", plant.species.scientificNameWithoutAuthor);
+  selectPlant(plant);
+};
+
+const formatConfidenceScore = (score: number): string => {
+  return `${Math.round(score * 100)}%`;
+};
+
+const truncateText = (text: string, maxLength: number): string => {
+  return text.length > maxLength
+    ? `${text.substring(0, maxLength)}...`
+    : text;
+};
+
+// Error State
+if (error) {
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.imageContainer}>
+        <Image source={{ uri: finalImageUri }} style={styles.capturedImage} />
+      </View>
+
+      <View style={styles.contentContainer}>
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorTitle}>Identification Failed</Text>
+          <Text style={styles.errorText}>{error}</Text>
         </View>
 
-        <View style={styles.contentContainer}>
-          <View style={styles.errorContainer}>
-            <Text style={styles.errorTitle}>Identification Failed</Text>
-            <Text style={styles.errorText}>{error}</Text>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={styles.retryButton}
+            onPress={handleRetakePhoto}
+          >
+            <Text style={styles.buttonText}>Take Another Photo</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </SafeAreaView>
+  );
+}
+
+return (
+  <SafeAreaView style={styles.container}>
+    {/* Header with captured image */}
+    <View style={styles.imageContainer}>
+      <Image source={{ uri: finalImageUri }} style={styles.capturedImage} />
+    </View>
+
+    {/* Content Container with proper spacing */}
+    <View style={styles.contentContainer}>
+      {/* Loading State */}
+      {isLoading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#4CAF50" />
+          <Text style={styles.loadingText}>Identifying your plant...</Text>
+          <Text style={styles.loadingSubtext}>
+            This may take a few seconds
+          </Text>
+        </View>
+      )}
+
+      {/* Results */}
+      {!isLoading && identificationResults.length > 0 && (
+        <>
+          {/* Scrollable Results */}
+          <View style={styles.resultsScrollContainer}>
+            <Text style={styles.resultsTitle}>
+              Plant Identification Results
+            </Text>
+
+            <ScrollView
+              style={styles.resultsScroll}
+              contentContainerStyle={styles.resultsContent}
+              showsVerticalScrollIndicator={false}
+            >
+              {identificationResults
+                .slice(0, 3)
+                .map((result: PlantIdentificationResult, index: number) => (
+                  <TouchableOpacity
+                    key={`${result.species.scientificNameWithoutAuthor}_${index}`}
+                    style={[
+                      styles.resultCard,
+                      selectedPlant?.species.scientificNameWithoutAuthor ===
+                        result.species.scientificNameWithoutAuthor &&
+                        styles.selectedResultCard,
+                    ]}
+                    onPress={() => handleSelectPlant(result)}
+                    activeOpacity={0.7}
+                  >
+                    <View style={styles.resultHeader}>
+                      <Text style={styles.plantName}>
+                        {truncateText(
+                          result.species.scientificNameWithoutAuthor,
+                          25
+                        )}
+                      </Text>
+                      <View style={styles.confidenceContainer}>
+                        <Text style={styles.confidenceScore}>
+                          {formatConfidenceScore(result.score)} match
+                        </Text>
+                      </View>
+                    </View>
+
+                    {result.species.commonNames &&
+                      result.species.commonNames.length > 0 && (
+                        <Text style={styles.commonName}>
+                          Common name:{" "}
+                          {truncateText(result.species.commonNames[0], 30)}
+                        </Text>
+                      )}
+
+                    <Text style={styles.familyName}>
+                      Family:{" "}
+                      {result.species.family.scientificNameWithoutAuthor}
+                    </Text>
+
+                    {result.species.genus && (
+                      <Text style={styles.genusName}>
+                        Genus:{" "}
+                        {result.species.genus.scientificNameWithoutAuthor}
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                ))}
+            </ScrollView>
+          </View>
+
+          {/* Fixed Action Buttons */}
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={styles.secondaryButton}
+              onPress={handleRetakePhoto}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.secondaryButtonText}>
+                Take Another Photo
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.primaryButton,
+                !selectedPlant && styles.disabledButton,
+              ]}
+              onPress={handleContinue}
+              disabled={!selectedPlant}
+              activeOpacity={selectedPlant ? 0.7 : 1}
+            >
+              <Text
+                style={[
+                  styles.primaryButtonText,
+                  !selectedPlant && styles.disabledButtonText,
+                ]}
+              >
+                This looks correct
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </>
+      )}
+
+      {/* No Results */}
+      {!isLoading && identificationResults.length === 0 && !error && (
+        <>
+          <View style={styles.noResultsContainer}>
+            <Text style={styles.noResultsTitle}>No matches found</Text>
+            <Text style={styles.noResultsText}>
+              Try taking a clearer photo with better lighting, or focus on the
+              leaves and flowers.
+            </Text>
           </View>
 
           <View style={styles.buttonContainer}>
@@ -113,153 +264,11 @@ const PlantIdentificationScreen: React.FC = () => {
               <Text style={styles.buttonText}>Take Another Photo</Text>
             </TouchableOpacity>
           </View>
-        </View>
-      </SafeAreaView>
-    );
-  }
-
-  return (
-    <SafeAreaView style={styles.container}>
-      {/* Header with captured image */}
-      <View style={styles.imageContainer}>
-        <Image source={{ uri: finalImageUri }} style={styles.capturedImage} />
-      </View>
-
-      {/* Content Container with proper spacing */}
-      <View style={styles.contentContainer}>
-        {/* Loading State */}
-        {isLoading && (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#4CAF50" />
-            <Text style={styles.loadingText}>Identifying your plant...</Text>
-            <Text style={styles.loadingSubtext}>
-              This may take a few seconds
-            </Text>
-          </View>
-        )}
-
-        {/* Results */}
-        {!isLoading && identificationResults.length > 0 && (
-          <>
-            {/* Scrollable Results */}
-            <View style={styles.resultsScrollContainer}>
-              <Text style={styles.resultsTitle}>
-                Plant Identification Results
-              </Text>
-
-              <ScrollView
-                style={styles.resultsScroll}
-                contentContainerStyle={styles.resultsContent}
-                showsVerticalScrollIndicator={false}
-              >
-                {identificationResults
-                  .slice(0, 3)
-                  .map((result: PlantIdentificationResult, index: number) => (
-                    <TouchableOpacity
-                      key={`${result.species.scientificNameWithoutAuthor}_${index}`}
-                      style={[
-                        styles.resultCard,
-                        selectedPlant?.species.scientificNameWithoutAuthor ===
-                          result.species.scientificNameWithoutAuthor &&
-                          styles.selectedResultCard,
-                      ]}
-                      onPress={() => handleSelectPlant(result)}
-                      activeOpacity={0.7}
-                    >
-                      <View style={styles.resultHeader}>
-                        <Text style={styles.plantName}>
-                          {truncateText(
-                            result.species.scientificNameWithoutAuthor,
-                            25
-                          )}
-                        </Text>
-                        <View style={styles.confidenceContainer}>
-                          <Text style={styles.confidenceScore}>
-                            {formatConfidenceScore(result.score)} match
-                          </Text>
-                        </View>
-                      </View>
-
-                      {result.species.commonNames &&
-                        result.species.commonNames.length > 0 && (
-                          <Text style={styles.commonName}>
-                            Common name:{" "}
-                            {truncateText(result.species.commonNames[0], 30)}
-                          </Text>
-                        )}
-
-                      <Text style={styles.familyName}>
-                        Family:{" "}
-                        {result.species.family.scientificNameWithoutAuthor}
-                      </Text>
-
-                      {result.species.genus && (
-                        <Text style={styles.genusName}>
-                          Genus:{" "}
-                          {result.species.genus.scientificNameWithoutAuthor}
-                        </Text>
-                      )}
-                    </TouchableOpacity>
-                  ))}
-              </ScrollView>
-            </View>
-
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={styles.secondaryButton}
-                onPress={handleRetakePhoto}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.secondaryButtonText}>
-                  Take Another Photo
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[
-                  styles.primaryButton,
-                  !selectedPlant && styles.disabledButton,
-                ]}
-                onPress={handleContinue}
-                disabled={!selectedPlant}
-                activeOpacity={selectedPlant ? 0.7 : 1}
-              >
-                <Text
-                  style={[
-                    styles.primaryButtonText,
-                    !selectedPlant && styles.disabledButtonText,
-                  ]}
-                >
-                  This looks correct
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </>
-        )}
-
-        {!isLoading && identificationResults.length === 0 && !error && (
-          <>
-            <View style={styles.noResultsContainer}>
-              <Text style={styles.noResultsTitle}>No matches found</Text>
-              <Text style={styles.noResultsText}>
-                Try taking a clearer photo with better lighting, or focus on the
-                leaves and flowers.
-              </Text>
-            </View>
-
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={styles.retryButton}
-                onPress={handleRetakePhoto}
-              >
-                <Text style={styles.buttonText}>Take Another Photo</Text>
-              </TouchableOpacity>
-            </View>
-          </>
-        )}
-      </View>
-    </SafeAreaView>
-  );
+        </>
+      )}
+    </View>
+  </SafeAreaView>
+);
 };
 
 const styles = StyleSheet.create({
