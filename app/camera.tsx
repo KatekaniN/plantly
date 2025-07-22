@@ -62,22 +62,14 @@ export default function NewScreen() {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: "Images" as any,
         allowsEditing: true,
-        aspect: [1, 1], // Square aspect ratio works better for plant identification
-        quality: 0.9, // Higher quality for better identification
+        aspect: [1, 1],
+        quality: 0.9,
         allowsMultipleSelection: false,
       });
 
       if (!result.canceled && result.assets[0]) {
         const originalUri = result.assets[0].uri;
-        console.log("📷 Selected image URI:", originalUri);
-        console.log(
-          "📊 Image dimensions:",
-          result.assets[0].width,
-          "x",
-          result.assets[0].height
-        );
 
-        // Process and validate image
         const processedUri = await processImageForIdentification(originalUri);
         const persistentUri = await saveImageToPersistentLocation(processedUri);
 

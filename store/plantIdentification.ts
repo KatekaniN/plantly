@@ -260,11 +260,9 @@ export const usePlantIdentificationStore = create(
       },
 
       identifyPlant: async (imageUri: string): Promise<void> => {
-        console.log("🚀 Starting plant identification process...");
         set({ isLoading: true, error: null });
 
         try {
-          // Validate image URI
           if (!imageUri) {
             throw new Error("No image provided for identification");
           }
@@ -275,13 +273,10 @@ export const usePlantIdentificationStore = create(
             if (!fileInfo.exists) {
               throw new Error("Image file not found");
             }
-            console.log("📁 Image file exists, size:", fileInfo.size);
           }
 
           const identificationResults =
             await identifyPlantWithPlantNet(imageUri);
-
-          console.log("🎉 Identification completed successfully");
 
           set({
             identificationResults,
