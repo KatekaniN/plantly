@@ -28,8 +28,6 @@ const PlantIdentificationScreen: React.FC = () => {
     ? params.imageUri[0]
     : params.imageUri;
 
-
-
   const finalImageUri = imageUri;
 
   const {
@@ -70,7 +68,6 @@ const PlantIdentificationScreen: React.FC = () => {
 
   const handleContinue = (): void => {
     if (selectedPlant) {
-
       const defaultCareDetails = generateDefaultCareDetails(selectedPlant);
       setCareDetails(defaultCareDetails);
       router.push("/plantdetailsreview");
@@ -384,7 +381,7 @@ const styles = StyleSheet.create({
     color: "#888888",
   },
   buttonContainer: {
-    bottom: "2%",
+    bottom: "4%",
     flexDirection: "row",
     gap: 12,
     paddingTop: 8,
