@@ -28,8 +28,7 @@ const PlantIdentificationScreen: React.FC = () => {
     ? params.imageUri[0]
     : params.imageUri;
 
-  console.log("Received params:", params);
-  console.log("Extracted imageUri:", imageUri);
+
 
   const finalImageUri = imageUri;
 
@@ -71,11 +70,6 @@ const PlantIdentificationScreen: React.FC = () => {
 
   const handleContinue = (): void => {
     if (selectedPlant) {
-      console.log("🚀 Navigating to plant details review...");
-      console.log(
-        "Selected plant:",
-        selectedPlant.species.scientificNameWithoutAuthor
-      );
 
       const defaultCareDetails = generateDefaultCareDetails(selectedPlant);
       setCareDetails(defaultCareDetails);
@@ -86,10 +80,6 @@ const PlantIdentificationScreen: React.FC = () => {
   };
 
   const handleSelectPlant = (plant: PlantIdentificationResult): void => {
-    console.log(
-      "🌱 Plant selected:",
-      plant.species.scientificNameWithoutAuthor
-    );
     selectPlant(plant);
   };
 
@@ -103,7 +93,6 @@ const PlantIdentificationScreen: React.FC = () => {
       : text;
   };
 
-  // Error State
   if (error) {
     return (
       <SafeAreaView style={styles.container}>
@@ -142,7 +131,7 @@ const PlantIdentificationScreen: React.FC = () => {
         {/* Loading State */}
         {isLoading && (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#4CAF50" />
+            <ActivityIndicator size="large" color={theme.colorLeafyGreen} />
             <Text style={styles.loadingText}>Identifying your plant...</Text>
             <Text style={styles.loadingSubtext}>
               This may take a few seconds
@@ -243,7 +232,7 @@ const PlantIdentificationScreen: React.FC = () => {
                     !selectedPlant && styles.disabledButtonText,
                   ]}
                 >
-                  This looks correct
+                  This looks correct {selectedPlant ? "" : "❌"}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -276,7 +265,6 @@ const PlantIdentificationScreen: React.FC = () => {
   );
 };
 
-// ... rest of your styles remain the same
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -352,7 +340,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   selectedResultCard: {
-    borderColor: "#4CAF50",
+    borderColor: theme.colorLeafyGreen,
     backgroundColor: "#f1f8e9",
   },
   resultHeader: {
@@ -377,7 +365,7 @@ const styles = StyleSheet.create({
   },
   confidenceScore: {
     fontSize: 12,
-    color: "#4CAF50",
+    color: theme.colorLeafyGreen,
     fontWeight: "600",
   },
   commonName: {
@@ -407,11 +395,11 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     flex: 1,
-    backgroundColor: "#4CAF50",
+    backgroundColor: theme.colorLeafyGreen,
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: "center",
-    shadowColor: "#4CAF50",
+    shadowColor: theme.colorLeafyGreen,
     shadowOffset: {
       width: 0,
       height: 4,
@@ -427,7 +415,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: "center",
     borderWidth: 2,
-    borderColor: "#4CAF50",
+    borderColor: theme.colorLeafyGreen,
   },
   disabledButton: {
     backgroundColor: "#cccccc",
@@ -440,7 +428,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   secondaryButtonText: {
-    color: "#4CAF50",
+    color: theme.colorLeafyGreen,
     fontSize: 16,
     fontWeight: "600",
   },
@@ -486,11 +474,11 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   retryButton: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: theme.colorLeafyGreen,
     paddingVertical: 16,
     paddingHorizontal: 32,
     borderRadius: 12,
-    shadowColor: "#4CAF50",
+    shadowColor: theme.colorLeafyGreen,
     shadowOffset: {
       width: 0,
       height: 4,

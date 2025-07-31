@@ -30,19 +30,11 @@ export default function Layout() {
         options={{
           headerShown: true,
           title: "Home",
+          headerTitle: "",
+          headerShadowVisible: false,
+        
           tabBarIcon: ({ size, color }) => (
             <Entypo name="leaf" size={size} color={color} />
-          ),
-          headerRight: () => (
-            <Link href="/camera" asChild>
-              <TouchableOpacity style={{ marginRight: 10 }} hitSlop={20}>
-                <AntDesign
-                  name="pluscircle"
-                  size={24}
-                  color={theme.colorGreen}
-                />
-              </TouchableOpacity>
-            </Link>
           ),
         }}
       ></Tabs.Screen>
