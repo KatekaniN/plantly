@@ -381,7 +381,7 @@ const styles = StyleSheet.create({
     color: "#888888",
   },
   buttonContainer: {
-    bottom: "4%",
+    bottom: "10%",
     flexDirection: "row",
     gap: 12,
     paddingTop: 8,

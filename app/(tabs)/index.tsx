@@ -341,10 +341,13 @@ export default function PlantCollectionScreen() {
       {/* Header */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.headerTitle}>Plantly Collection </Text>
+          <Text style={styles.headerTitle}>
+            {" "}
+            {myPlants.length === 0 ? "" : "Your Plantly Collection"}
+          </Text>
           <Text style={styles.headerSubtitle}>
             {myPlants.length === 0
-              ? "Start your plant journey"
+              ? ""
               : `${myPlants.length} plant${myPlants.length !== 1 ? "s" : ""} in your collection`}
           </Text>
         </View>
