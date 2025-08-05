@@ -16,6 +16,7 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { LinearGradient } from "expo-linear-gradient";
 import { theme } from "../../theme";
+import { useTheme } from "@/contexts/ThemeContext";
 import { usePlantIdentificationStore } from "@/store/plantIdentification";
 import type { PlantProfile } from "@/store/plantIdentification";
 
@@ -25,9 +26,15 @@ interface PlantCardProps {
   plant: PlantProfile;
   onPress: () => void;
   onDelete: () => void;
+  theme: any;
 }
 
-const PlantCard: React.FC<PlantCardProps> = ({ plant, onPress, onDelete }) => {
+const PlantCard: React.FC<PlantCardProps> = ({
+  plant,
+  onPress,
+  onDelete,
+  theme: currentTheme,
+}) => {
   const [imageError, setImageError] = useState(false);
 
   const formatDate = (dateString: string) => {
@@ -70,7 +77,7 @@ const PlantCard: React.FC<PlantCardProps> = ({ plant, onPress, onDelete }) => {
 
   return (
     <TouchableOpacity
-      style={styles.plantCard}
+      style={[styles.plantCard, { backgroundColor: currentTheme.colorCard }]}
       onPress={onPress}
       activeOpacity={0.7}
     >
@@ -82,8 +89,17 @@ const PlantCard: React.FC<PlantCardProps> = ({ plant, onPress, onDelete }) => {
             onError={() => setImageError(true)}
           />
         ) : (
-          <View style={styles.placeholderImage}>
-            <FontAwesome6 name="seedling" size={40} color={theme.colorGrey} />
+          <View
+            style={[
+              styles.placeholderImage,
+              { backgroundColor: currentTheme.colorSurface },
+            ]}
+          >
+            <FontAwesome6
+              name="seedling"
+              size={40}
+              color={currentTheme.colorTextSecondary}
+            />
           </View>
         )}
 
@@ -101,11 +117,20 @@ const PlantCard: React.FC<PlantCardProps> = ({ plant, onPress, onDelete }) => {
       </View>
 
       <View style={styles.cardContent}>
-        <Text style={styles.plantName} numberOfLines={1}>
+        <Text
+          style={[styles.plantName, { color: currentTheme.colorText }]}
+          numberOfLines={1}
+        >
           {plant.name}
         </Text>
 
-        <Text style={styles.scientificName} numberOfLines={1}>
+        <Text
+          style={[
+            styles.scientificName,
+            { color: currentTheme.colorTextSecondary },
+          ]}
+          numberOfLines={1}
+        >
           {plant.identification.species.scientificNameWithoutAuthor}
         </Text>
 
@@ -114,9 +139,15 @@ const PlantCard: React.FC<PlantCardProps> = ({ plant, onPress, onDelete }) => {
             <FontAwesome6
               name="location-dot"
               size={12}
-              color={theme.colorGrey}
+              color={currentTheme.colorTextSecondary}
             />
-            <Text style={styles.locationText} numberOfLines={1}>
+            <Text
+              style={[
+                styles.locationText,
+                { color: currentTheme.colorTextSecondary },
+              ]}
+              numberOfLines={1}
+            >
               {plant.location}
             </Text>
           </View>
@@ -142,7 +173,12 @@ const PlantCard: React.FC<PlantCardProps> = ({ plant, onPress, onDelete }) => {
           </View>
         )}
 
-        <Text style={styles.lastWateredDate}>
+        <Text
+          style={[
+            styles.lastWateredDate,
+            { color: currentTheme.colorTextSecondary },
+          ]}
+        >
           {plant.lastWatered
             ? `Last watered ${formatDate(plant.lastWatered)}`
             : "Never watered"}
@@ -152,7 +188,10 @@ const PlantCard: React.FC<PlantCardProps> = ({ plant, onPress, onDelete }) => {
   );
 };
 
-const EmptyState: React.FC<{ onAddPlant: () => void }> = ({ onAddPlant }) => (
+const EmptyState: React.FC<{ onAddPlant: () => void; theme: any }> = ({
+  onAddPlant,
+  theme: currentTheme,
+}) => (
   <ScrollView
     contentContainerStyle={styles.emptyState}
     showsVerticalScrollIndicator={false}
@@ -160,12 +199,33 @@ const EmptyState: React.FC<{ onAddPlant: () => void }> = ({ onAddPlant }) => (
     {/* Hero Section */}
     <View style={styles.emptyHeroSection}>
       <View style={styles.emptyIconContainer}>
-        <FontAwesome6 name="seedling" size={60} color={theme.colorLeafyGreen} />
-        <View style={styles.decorativeCircle1} />
-        <View style={styles.decorativeCircle2} />
+        <FontAwesome6
+          name="seedling"
+          size={60}
+          color={currentTheme.colorLeafyGreen}
+        />
+        <View
+          style={[
+            styles.decorativeCircle1,
+            { backgroundColor: currentTheme.colorLeafyGreen + "10" },
+          ]}
+        />
+        <View
+          style={[
+            styles.decorativeCircle2,
+            { backgroundColor: currentTheme.colorLeafyGreen + "20" },
+          ]}
+        />
       </View>
-      <Text style={styles.emptyTitle}>Welcome to Plantly</Text>
-      <Text style={styles.emptySubtitle}>
+      <Text style={[styles.emptyTitle, { color: currentTheme.colorText }]}>
+        Welcome to Plantly
+      </Text>
+      <Text
+        style={[
+          styles.emptySubtitle,
+          { color: currentTheme.colorTextSecondary },
+        ]}
+      >
         Your personal plant care companion awaits! Start your green journey by
         identifying your first plant.
       </Text>
@@ -173,39 +233,110 @@ const EmptyState: React.FC<{ onAddPlant: () => void }> = ({ onAddPlant }) => (
 
     {/* Features Preview */}
     <View style={styles.featuresContainer}>
-      <Text style={styles.featuresTitle}>What you can do:</Text>
+      <Text style={[styles.featuresTitle, { color: currentTheme.colorText }]}>
+        What you can do:
+      </Text>
 
-      <View style={styles.featureItem}>
-        <View style={styles.featureIcon}>
-          <FontAwesome6 name="camera" size={20} color={theme.colorLeafyGreen} />
+      <View
+        style={[
+          styles.featureItem,
+          { backgroundColor: currentTheme.colorCard },
+        ]}
+      >
+        <View
+          style={[
+            styles.featureIcon,
+            { backgroundColor: currentTheme.colorLeafyGreen + "20" },
+          ]}
+        >
+          <FontAwesome6
+            name="camera"
+            size={20}
+            color={currentTheme.colorLeafyGreen}
+          />
         </View>
         <View style={styles.featureContent}>
-          <Text style={styles.featureItemTitle}>Identify Plants</Text>
-          <Text style={styles.featureItemText}>
+          <Text
+            style={[styles.featureItemTitle, { color: currentTheme.colorText }]}
+          >
+            Identify Plants
+          </Text>
+          <Text
+            style={[
+              styles.featureItemText,
+              { color: currentTheme.colorTextSecondary },
+            ]}
+          >
             Take a photo and discover what plant you have
           </Text>
         </View>
       </View>
 
-      <View style={styles.featureItem}>
-        <View style={styles.featureIcon}>
-          <FontAwesome6 name="droplet" size={20} color="#3498db" />
+      <View
+        style={[
+          styles.featureItem,
+          { backgroundColor: currentTheme.colorCard },
+        ]}
+      >
+        <View
+          style={[
+            styles.featureIcon,
+            { backgroundColor: currentTheme.colorBlue + "20" },
+          ]}
+        >
+          <FontAwesome6
+            name="droplet"
+            size={20}
+            color={currentTheme.colorBlue}
+          />
         </View>
         <View style={styles.featureContent}>
-          <Text style={styles.featureItemTitle}>Care Reminders</Text>
-          <Text style={styles.featureItemText}>
+          <Text
+            style={[styles.featureItemTitle, { color: currentTheme.colorText }]}
+          >
+            Care Reminders
+          </Text>
+          <Text
+            style={[
+              styles.featureItemText,
+              { color: currentTheme.colorTextSecondary },
+            ]}
+          >
             Get personalized watering and care schedules
           </Text>
         </View>
       </View>
 
-      <View style={styles.featureItem}>
-        <View style={styles.featureIcon}>
-          <FontAwesome6 name="chart-line" size={20} color="#e74c3c" />
+      <View
+        style={[
+          styles.featureItem,
+          { backgroundColor: currentTheme.colorCard },
+        ]}
+      >
+        <View
+          style={[
+            styles.featureIcon,
+            { backgroundColor: currentTheme.colorError + "20" },
+          ]}
+        >
+          <FontAwesome6
+            name="chart-line"
+            size={20}
+            color={currentTheme.colorError}
+          />
         </View>
         <View style={styles.featureContent}>
-          <Text style={styles.featureItemTitle}>Track Growth</Text>
-          <Text style={styles.featureItemText}>
+          <Text
+            style={[styles.featureItemTitle, { color: currentTheme.colorText }]}
+          >
+            Track Growth
+          </Text>
+          <Text
+            style={[
+              styles.featureItemText,
+              { color: currentTheme.colorTextSecondary },
+            ]}
+          >
             Monitor your plants' health and progress
           </Text>
         </View>
@@ -214,7 +345,13 @@ const EmptyState: React.FC<{ onAddPlant: () => void }> = ({ onAddPlant }) => (
 
     {/* Call to Action */}
     <View style={styles.ctaContainer}>
-      <TouchableOpacity style={styles.addFirstPlantButton} onPress={onAddPlant}>
+      <TouchableOpacity
+        style={[
+          styles.addFirstPlantButton,
+          { backgroundColor: currentTheme.colorLeafyGreen },
+        ]}
+        onPress={onAddPlant}
+      >
         <FontAwesome6
           name="camera"
           size={20}
@@ -224,9 +361,20 @@ const EmptyState: React.FC<{ onAddPlant: () => void }> = ({ onAddPlant }) => (
         <Text style={styles.addFirstPlantText}>Identify Your First Plant</Text>
       </TouchableOpacity>
 
-      <View style={styles.tipContainer}>
-        <FontAwesome6 name="lightbulb" size={16} color={theme.colorGrey} />
-        <Text style={styles.tipText}>
+      <View
+        style={[
+          styles.tipContainer,
+          { backgroundColor: currentTheme.colorSurface },
+        ]}
+      >
+        <FontAwesome6
+          name="lightbulb"
+          size={16}
+          color={currentTheme.colorTextSecondary}
+        />
+        <Text
+          style={[styles.tipText, { color: currentTheme.colorTextSecondary }]}
+        >
           Tip: Take clear photos of leaves, flowers, or the whole plant for
           better identification
         </Text>
@@ -280,6 +428,7 @@ const StatsCard: React.FC<{ plants: PlantProfile[] }> = ({ plants }) => {
 
 export default function PlantCollectionScreen() {
   const router = useRouter();
+  const { theme: currentTheme } = useTheme();
   const {
     myPlants,
     clearCurrentIdentification,
@@ -337,15 +486,25 @@ export default function PlantCollectionScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        { backgroundColor: currentTheme.colorBackground },
+      ]}
+    >
       {/* Header */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.headerTitle}>
+          <Text style={[styles.headerTitle, { color: currentTheme.colorText }]}>
             {" "}
             {myPlants.length === 0 ? "" : "Your Plantly Collection"}
           </Text>
-          <Text style={styles.headerSubtitle}>
+          <Text
+            style={[
+              styles.headerSubtitle,
+              { color: currentTheme.colorTextSecondary },
+            ]}
+          >
             {myPlants.length === 0
               ? ""
               : `${myPlants.length} plant${myPlants.length !== 1 ? "s" : ""} in your collection`}
@@ -357,7 +516,7 @@ export default function PlantCollectionScreen() {
       </View>
 
       {myPlants.length === 0 ? (
-        <EmptyState onAddPlant={handleAddPlant} />
+        <EmptyState onAddPlant={handleAddPlant} theme={currentTheme} />
       ) : (
         <ScrollView
           style={styles.scrollView}
@@ -376,6 +535,7 @@ export default function PlantCollectionScreen() {
               <PlantCard
                 key={plant.id}
                 plant={plant}
+                theme={currentTheme}
                 onPress={() => handlePlantPress(plant)}
                 onDelete={() => handleDeletePlant(plant.id, plant.name)}
               />
@@ -384,15 +544,25 @@ export default function PlantCollectionScreen() {
 
           {/* Add more plants prompt */}
           <TouchableOpacity
-            style={styles.addMoreButton}
+            style={[
+              styles.addMoreButton,
+              { borderColor: currentTheme.colorLeafyGreen },
+            ]}
             onPress={handleAddPlant}
           >
             <FontAwesome
               name="plus-circle"
               size={24}
-              color={theme.colorLeafyGreen}
+              color={currentTheme.colorLeafyGreen}
             />
-            <Text style={styles.addMoreText}>Add Another Plant</Text>
+            <Text
+              style={[
+                styles.addMoreText,
+                { color: currentTheme.colorLeafyGreen },
+              ]}
+            >
+              Add Another Plant
+            </Text>
           </TouchableOpacity>
         </ScrollView>
       )}
@@ -403,7 +573,6 @@ export default function PlantCollectionScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colorWhite,
   },
   header: {
     flexDirection: "row",
@@ -417,11 +586,9 @@ const styles = StyleSheet.create({
     fontSize: 28,
     marginBottom: 8,
     fontWeight: "700",
-    color: theme.colorDarkGreen,
   },
   headerSubtitle: {
     fontSize: 14,
-    color: theme.colorGrey,
     marginTop: 2,
   },
   addButton: {
@@ -483,7 +650,6 @@ const styles = StyleSheet.create({
   },
   plantCard: {
     width: (screenWidth - 60) / 2,
-    backgroundColor: "#fff",
     borderRadius: 12,
     marginBottom: 16,
     shadowColor: "#000",
@@ -510,7 +676,6 @@ const styles = StyleSheet.create({
     height: 120,
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
-    backgroundColor: "#f0f0f0",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -531,13 +696,11 @@ const styles = StyleSheet.create({
   plantName: {
     fontSize: 16,
     fontWeight: "600",
-    color: theme.colorDarkGreen,
     marginBottom: 4,
   },
   scientificName: {
     fontSize: 12,
     fontStyle: "italic",
-    color: theme.colorGrey,
     marginBottom: 8,
   },
   locationContainer: {
@@ -547,7 +710,6 @@ const styles = StyleSheet.create({
   },
   locationText: {
     fontSize: 12,
-    color: theme.colorGrey,
     marginLeft: 4,
     flex: 1,
   },
@@ -566,7 +728,6 @@ const styles = StyleSheet.create({
   },
   lastWateredDate: {
     fontSize: 10,
-    color: theme.colorGrey,
   },
   emptyState: {
     flexGrow: 1,
@@ -588,7 +749,6 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: theme.colorLeafyGreen + "10",
     top: -20,
     left: -20,
     zIndex: -1,
@@ -598,7 +758,6 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: theme.colorLeafyGreen + "20",
     bottom: -10,
     right: -30,
     zIndex: -1,
@@ -606,13 +765,11 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 28,
     fontWeight: "700",
-    color: theme.colorDarkGreen,
     marginBottom: 8,
     textAlign: "center",
   },
   emptySubtitle: {
     fontSize: 16,
-    color: theme.colorGrey,
     textAlign: "center",
     lineHeight: 24,
     maxWidth: 280,
@@ -623,7 +780,6 @@ const styles = StyleSheet.create({
   featuresTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: theme.colorDarkGreen,
     marginBottom: 20,
     textAlign: "center",
   },
@@ -631,7 +787,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 20,
-    backgroundColor: "#fff",
     padding: 16,
     borderRadius: 12,
     shadowColor: "#000",
@@ -647,7 +802,6 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: theme.colorLeafyGreen + "20",
     alignItems: "center",
     justifyContent: "center",
     marginRight: 16,
@@ -658,12 +812,10 @@ const styles = StyleSheet.create({
   featureItemTitle: {
     fontSize: 16,
     fontWeight: "600",
-    color: theme.colorDarkGreen,
     marginBottom: 4,
   },
   featureItemText: {
     fontSize: 14,
-    color: theme.colorGrey,
     lineHeight: 18,
   },
   ctaContainer: {
@@ -675,19 +827,16 @@ const styles = StyleSheet.create({
     marginTop: 20,
     paddingHorizontal: 20,
     paddingVertical: 12,
-    backgroundColor: "#f8f9fa",
     borderRadius: 8,
     maxWidth: 300,
   },
   tipText: {
     fontSize: 12,
-    color: theme.colorGrey,
     marginLeft: 8,
     flex: 1,
     textAlign: "center",
   },
   addFirstPlantButton: {
-    backgroundColor: theme.colorLeafyGreen,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 24,
@@ -716,11 +865,9 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: theme.colorLeafyGreen,
     borderStyle: "dashed",
   },
   addMoreText: {
-    color: theme.colorLeafyGreen,
     fontSize: 16,
     fontWeight: "600",
     marginLeft: 8,

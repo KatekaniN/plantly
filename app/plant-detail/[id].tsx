@@ -17,6 +17,7 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import Entypo from "@expo/vector-icons/Entypo";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { theme } from "../../theme";
+import { useTheme } from "@/contexts/ThemeContext";
 import { usePlantIdentificationStore } from "@/store/plantIdentification";
 import type { PlantProfile } from "@/store/plantIdentification";
 import notificationService from "@/services/notificationService";
@@ -28,6 +29,7 @@ interface CareDetailItemProps {
   label: string;
   value: string;
   onEdit?: () => void;
+  currentTheme: any;
 }
 
 const CareDetailItem: React.FC<CareDetailItemProps> = ({
@@ -35,22 +37,41 @@ const CareDetailItem: React.FC<CareDetailItemProps> = ({
   label,
   value,
   onEdit,
+  currentTheme,
 }) => (
-  <View style={styles.careDetailItem}>
+  <View
+    style={[
+      styles.careDetailItem,
+      { backgroundColor: currentTheme.colorSurface },
+    ]}
+  >
     <View style={styles.careDetailHeader}>
       <FontAwesome6
         name={icon as any}
         size={16}
-        color={theme.colorLeafyGreen}
+        color={currentTheme.colorLeafyGreen}
       />
-      <Text style={styles.careDetailLabel}>{label}</Text>
+      <Text style={[styles.careDetailLabel, { color: currentTheme.colorText }]}>
+        {label}
+      </Text>
       {onEdit && (
         <TouchableOpacity onPress={onEdit} style={styles.editButton}>
-          <FontAwesome6 name="edit" size={14} color={theme.colorGrey} />
+          <FontAwesome6
+            name="edit"
+            size={14}
+            color={currentTheme.colorTextSecondary}
+          />
         </TouchableOpacity>
       )}
     </View>
-    <Text style={styles.careDetailValue}>{value}</Text>
+    <Text
+      style={[
+        styles.careDetailValue,
+        { color: currentTheme.colorTextSecondary },
+      ]}
+    >
+      {value}
+    </Text>
   </View>
 );
 
@@ -59,30 +80,57 @@ interface ActionButtonProps {
   label: string;
   onPress: () => void;
   color?: string;
+  paddingHorizontal?: number;
   backgroundColor?: string;
+  borderColor?: string;
+  borderWidth?: number;
+  currentTheme: any;
 }
 
 const ActionButton: React.FC<ActionButtonProps> = ({
   icon,
   label,
   onPress,
-  color = theme.colorLeafyGreen,
-  backgroundColor = theme.colorLeafyGreen + "20",
+  color,
+  backgroundColor,
+  borderColor,
+  paddingHorizontal,
+  borderWidth = 1,
+  currentTheme,
 }) => (
   <TouchableOpacity
-    style={[styles.actionButton, { backgroundColor }]}
+    style={[
+      styles.actionButton,
+      {
+        backgroundColor: backgroundColor || currentTheme.colorLeafyGreen + "20",
+        paddingHorizontal,
+        ...(borderColor && { borderColor, borderWidth }),
+      },
+    ]}
     onPress={onPress}
     activeOpacity={0.7}
   >
-    <FontAwesome6 name={icon as any} size={20} color={color} />
-    <Text style={[styles.actionButtonText, { color }]}>{label}</Text>
+    <FontAwesome6
+      name={icon as any}
+      size={20}
+      color={color || currentTheme.colorLeafyGreen}
+    />
+    <Text
+      style={[
+        styles.actionButtonText,
+        { color: color || currentTheme.colorLeafyGreen },
+      ]}
+    >
+      {label}
+    </Text>
   </TouchableOpacity>
 );
 
 export default function PlantDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
-  const { myPlants, deletePlantFromCollection, waterPlant } =
+  const { theme: currentTheme, isDark } = useTheme();
+  const { myPlants, deletePlantFromCollection, waterPlant, updatePlant } =
     usePlantIdentificationStore();
   const insets = useSafeAreaInsets();
 
@@ -120,11 +168,28 @@ export default function PlantDetailScreen() {
 
   if (!plant) {
     return (
-      <View style={[styles.container, { paddingTop: insets.top }]}>
-        <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+      <View
+        style={[
+          styles.container,
+          {
+            paddingTop: insets.top,
+            backgroundColor: currentTheme.colorBackground,
+          },
+        ]}
+      >
+        <StatusBar
+          barStyle={isDark ? "light-content" : "dark-content"}
+          backgroundColor={currentTheme.colorBackground}
+        />
         <View style={styles.loadingContainer}>
-          <FontAwesome6 name="seedling" size={50} color={theme.colorGrey} />
-          <Text style={styles.loadingText}>Loading plant details...</Text>
+          <FontAwesome6
+            name="seedling"
+            size={50}
+            color={currentTheme.colorTextSecondary}
+          />
+          <Text style={[styles.loadingText, { color: currentTheme.colorText }]}>
+            Loading plant details...
+          </Text>
         </View>
       </View>
     );
@@ -168,9 +233,7 @@ export default function PlantDetailScreen() {
   };
 
   const handleEditPlant = () => {
-    // TODO: Navigate to edit screen
-    console.log("✏️ Edit plant:", plant.name);
-    Alert.alert("Coming Soon", "Plant editing feature will be available soon!");
+    router.push(`/edit-plant/${plant.id}`);
   };
 
   const handleSharePlant = async () => {
@@ -182,66 +245,6 @@ export default function PlantDetailScreen() {
     } catch (error) {
       console.error("Error sharing:", error);
     }
-  };
-
-  const handleTestNotification = () => {
-    Alert.alert(
-      "Test Notifications",
-      "Choose notification test type:",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Immediate",
-          onPress: () => {
-            notificationService.sendTestNotification(plant.name);
-            Alert.alert("Success", "Immediate test notification sent! 📱");
-          },
-        },
-        {
-          text: "Quick Schedule (1-3 mins)",
-          onPress: () => {
-            // Schedule notifications for 1, 2, and 3 minutes from now
-            const now = new Date();
-            
-            // 1 minute from now
-            const oneMinute = new Date(now.getTime() + 1 * 60 * 1000);
-            // 2 minutes from now  
-            const twoMinutes = new Date(now.getTime() + 2 * 60 * 1000);
-            // 3 minutes from now
-            const threeMinutes = new Date(now.getTime() + 3 * 60 * 1000);
-            
-            notificationService.scheduleWateringReminder(
-              plant.id + '_test1',
-              plant.name,
-              oneMinute,
-              `test-1min-${Date.now()}`
-            );
-            
-            notificationService.scheduleWateringReminder(
-              plant.id + '_test2', 
-              plant.name,
-              twoMinutes,
-              `test-2min-${Date.now()}`
-            );
-            
-            notificationService.scheduleWateringReminder(
-              plant.id + '_test3',
-              plant.name, 
-              threeMinutes,
-              `test-3min-${Date.now()}`
-            );
-            
-            Alert.alert(
-              "Success", 
-              "Test notifications scheduled for 1, 2, and 3 minutes from now! 📱⏰"
-            );
-          },
-        },
-      ]
-    );
   };
 
   const handleDeletePlant = () => {
@@ -286,24 +289,25 @@ export default function PlantDetailScreen() {
         urgent: true,
         icon: "exclamation-triangle",
       };
-    } else if (diffDays === 0) {
+    } /*else if (diffDays === 0) {
       return {
         text: "Water today",
         color: "#ff9800",
         urgent: true,
         icon: "droplet",
-      };
-    } else if (diffDays === 1) {
+      };*/ else if (diffDays === 1) {
       return {
         text: "Water tomorrow",
-        color: "#ff9800",
+        greenColor: theme.colorLeafyGreen,
+        whiteColor: theme.colorWhite,
         urgent: false,
         icon: "clock",
       };
     } else {
       return {
         text: `Water in ${diffDays} days`,
-        color: theme.colorLeafyGreen,
+        greenColor: theme.colorLeafyGreen,
+        whiteColor: theme.colorWhite,
         urgent: false,
         icon: "calendar",
       };
@@ -313,11 +317,27 @@ export default function PlantDetailScreen() {
   const wateringInfo = getNextWateringInfo();
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+    <View
+      style={[
+        styles.container,
+        {
+          paddingTop: insets.top,
+          backgroundColor: currentTheme.colorBackground,
+        },
+      ]}
+    >
+      <StatusBar
+        barStyle={isDark ? "light-content" : "dark-content"}
+        backgroundColor={currentTheme.colorBackground}
+      />
 
       {/* Header */}
-      <View style={styles.header}>
+      <View
+        style={[
+          styles.header,
+          { backgroundColor: currentTheme.colorBackground },
+        ]}
+      >
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.back()}
@@ -325,7 +345,7 @@ export default function PlantDetailScreen() {
           <FontAwesome6
             name="arrow-left"
             size={22}
-            color={theme.colorLeafyGreen}
+            color={currentTheme.colorLeafyGreen}
           />
         </TouchableOpacity>
         {/*<Text style={styles.headerTitle} numberOfLines={1}>
@@ -335,13 +355,16 @@ export default function PlantDetailScreen() {
           <Entypo
             name="share-alternative"
             size={22}
-            color={theme.colorLeafyGreen}
+            color={currentTheme.colorLeafyGreen}
           />
         </TouchableOpacity>
       </View>
 
       <ScrollView
-        style={styles.scrollView}
+        style={[
+          styles.scrollView,
+          { backgroundColor: currentTheme.colorBackground },
+        ]}
         contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
         showsVerticalScrollIndicator={false}
       >
@@ -354,63 +377,136 @@ export default function PlantDetailScreen() {
               onError={() => setImageError(true)}
             />
           ) : (
-            <View style={styles.placeholderImage}>
-              <FontAwesome6 name="seedling" size={80} color={theme.colorGrey} />
-              <Text style={styles.placeholderText}>Image not available</Text>
+            <View
+              style={[
+                styles.placeholderImage,
+                { backgroundColor: currentTheme.colorSurface },
+              ]}
+            >
+              <FontAwesome6
+                name="seedling"
+                size={80}
+                color={currentTheme.colorTextSecondary}
+              />
+              <Text
+                style={[
+                  styles.placeholderText,
+                  { color: currentTheme.colorTextSecondary },
+                ]}
+              >
+                Image not available
+              </Text>
             </View>
           )}
         </View>
 
         {/* Plant Info */}
-        <View style={styles.plantInfoContainer}>
-          <Text style={styles.plantName}>{plant.name}</Text>
-          <Text style={styles.scientificName}>
-            {plant.identification.species.scientificNameWithoutAuthor}
+        <View
+          style={[
+            styles.plantInfoContainer,
+            { backgroundColor: currentTheme.colorBackground },
+          ]}
+        >
+          <Text style={[styles.plantName, { color: currentTheme.colorText }]}>
+            {plant.name}
+          </Text>
+          <Text
+            style={[
+              styles.commonNamesText,
+              { color: currentTheme.colorTextSecondary },
+            ]}
+          >
+            {plant.identification.species.commonNames.length > 0 && (
+              <Text
+                style={[
+                  styles.scientificName,
+                  { color: currentTheme.colorTextSecondary },
+                ]}
+              >
+                {plant.identification.species.commonNames.slice(0, 1)}
+              </Text>
+            )}
+            {plant.identification.species.commonNames.length > 0 && "  "}(
+            {plant.identification.species.scientificNameWithoutAuthor}){"\n"}
           </Text>
 
           <View style={styles.metaInfo}>
-            <View style={styles.metaItem}>
+            {/*<View style={styles.metaItem}>
               <FontAwesome6
                 name="microscope"
                 size={14}
-                color={theme.colorGrey}
+                color={theme.colorLeafyGreen}
               />
               <Text style={styles.metaText}>
                 {formatConfidenceScore(plant.identification.score)} match
               </Text>
-            </View>
+            </View>*/}
 
             {plant.location && (
-              <View style={styles.metaItem}>
+              <View
+                style={[
+                  styles.metaItem,
+                  { backgroundColor: currentTheme.colorSurface },
+                ]}
+              >
                 <FontAwesome6
                   name="location-dot"
                   size={16}
-                  color={theme.colorGrey}
+                  color={currentTheme.colorLeafyGreen}
                 />
-                <Text style={styles.metaText}>{plant.location}</Text>
+                <Text
+                  style={[
+                    styles.metaText,
+                    { color: currentTheme.colorTextSecondary },
+                  ]}
+                >
+                  {plant.location}
+                </Text>
               </View>
             )}
 
-            <View style={styles.metaItem}>
+            <View
+              style={[
+                styles.metaItem,
+                { backgroundColor: currentTheme.colorSurface },
+              ]}
+            >
               <FontAwesome6
                 name="calendar-plus"
                 size={16}
-                color={theme.colorGrey}
+                color={currentTheme.colorLeafyGreen}
               />
-              <Text style={styles.metaText}>
+              <Text
+                style={[
+                  styles.metaText,
+                  { color: currentTheme.colorTextSecondary },
+                ]}
+              >
                 Added {formatDate(plant.dateAdded)}
               </Text>
             </View>
 
-            <View style={styles.metaItem}>
+            <View
+              style={[
+                styles.metaItem,
+                { backgroundColor: currentTheme.colorSurface },
+              ]}
+            >
               <FontAwesome6
                 name="droplet"
                 size={16}
                 color={
-                  plant.lastWatered ? theme.colorLeafyGreen : theme.colorGrey
+                  plant.lastWatered
+                    ? currentTheme.colorLeafyGreen
+                    : currentTheme.colorTextSecondary
                 }
               />
-              <Text style={styles.metaText}>
+              <Text
+                style={[
+                  styles.metaText,
+                  { color: currentTheme.colorTextSecondary },
+                ]}
+              >
                 {plant.lastWatered
                   ? `Last watered ${formatDate(plant.lastWatered)}`
                   : "Never watered"}
@@ -418,7 +514,7 @@ export default function PlantDetailScreen() {
             </View>
           </View>
 
-          {/* Taxonomy */}
+          {/* Taxonomy 
           <View style={styles.taxonomyContainer}>
             <Text style={styles.taxonomyTitle}>Plant Classification</Text>
             <View style={styles.taxonomyGrid}>
@@ -451,6 +547,7 @@ export default function PlantDetailScreen() {
               </View>
             )}
           </View>
+        </View>*/}
         </View>
 
         {/* Watering Status */}
@@ -458,24 +555,29 @@ export default function PlantDetailScreen() {
           <View
             style={[
               styles.wateringStatusContainer,
-              { backgroundColor: wateringInfo.color + "15" },
+              { backgroundColor: wateringInfo.greenColor },
             ]}
           >
             <FontAwesome6
               name={wateringInfo.icon as any}
               size={24}
-              color={wateringInfo.color}
+              color={wateringInfo.whiteColor}
             />
             <View style={styles.wateringStatusText}>
               <Text
                 style={[
                   styles.wateringStatusTitle,
-                  { color: wateringInfo.color },
+                  { color: wateringInfo.whiteColor },
                 ]}
               >
                 {wateringInfo.text}
               </Text>
-              <Text style={styles.wateringStatusSubtitle}>
+              <Text
+                style={[
+                  styles.wateringStatusSubtitle,
+                  { color: wateringInfo.whiteColor },
+                ]}
+              >
                 Based on {plant.careDetails.wateringFrequency.toLowerCase()}{" "}
                 schedule
               </Text>
@@ -486,103 +588,138 @@ export default function PlantDetailScreen() {
         {/* Action Buttons */}
         <View style={styles.actionButtonsContainer}>
           <ActionButton
-            icon="droplet"
-            label="Water Plant"
-            onPress={handleWaterPlant}
-            color={theme.colorWhite}
-            backgroundColor="#2196F3"
-          />
-          <ActionButton
             icon="edit"
             label="Edit Details"
+            color={currentTheme.colorLeafyGreen}
+            borderColor={currentTheme.colorLeafyGreen}
+            borderWidth={1}
+            backgroundColor={currentTheme.colorBackground}
+            currentTheme={currentTheme}
             onPress={handleEditPlant}
           />
-          <ActionButton
-            icon="calendar"
-            label="View Scheduled"
-            onPress={async () => {
-              const scheduled = await notificationService.getScheduledNotifications();
-              const plantNotifications = scheduled.filter(n => {
-                const data = n.content.data as any;
-                return data?.plantId === plant.id;
-              });
-              
-              Alert.alert(
-                "Scheduled Notifications",
-                plantNotifications.length > 0 
-                  ? `${plantNotifications.length} notifications scheduled for ${plant.name}`
-                  : `No notifications scheduled for ${plant.name}`,
-                [{ text: "OK" }]
-              );
-            }}
-          />
+          {/* Delete Button */}
+          <TouchableOpacity
+            style={[
+              styles.deleteButton,
+              { backgroundColor: currentTheme.colorError },
+            ]}
+            onPress={handleDeletePlant}
+          >
+            <FontAwesome6
+              name="trash"
+              size={16}
+              color={currentTheme.colorTextInverse}
+            />
+            <Text
+              style={[
+                styles.deleteButtonText,
+                { color: currentTheme.colorTextInverse },
+              ]}
+            >
+              Delete Plant
+            </Text>
+          </TouchableOpacity>
         </View>
 
         {/* Care Details */}
-        <View style={styles.careDetailsContainer}>
-          <Text style={styles.sectionTitle}>Care Instructions</Text>
+        <View
+          style={[
+            styles.careDetailsContainer,
+            { backgroundColor: currentTheme.colorBackground },
+          ]}
+        >
+          <Text
+            style={[styles.sectionTitle, { color: currentTheme.colorText }]}
+          >
+            Care Instructions
+          </Text>
 
           <CareDetailItem
             icon="droplet"
             label="Watering"
             value={`${plant.careDetails.wateringFrequency} - ${plant.careDetails.wateringAmount}`}
+            currentTheme={currentTheme}
           />
 
           <CareDetailItem
             icon="sun"
             label="Sunlight"
             value={plant.careDetails.sunlightRequirement}
+            currentTheme={currentTheme}
           />
 
           <CareDetailItem
-            icon="thermometer-half"
+            icon="thermometer"
             label="Temperature"
             value={plant.careDetails.temperature}
+            currentTheme={currentTheme}
           />
 
           <CareDetailItem
             icon="wind"
             label="Humidity"
             value={plant.careDetails.humidity}
+            currentTheme={currentTheme}
           />
 
           <CareDetailItem
             icon="seedling"
             label="Soil Type"
             value={plant.careDetails.soilType}
+            currentTheme={currentTheme}
           />
 
           <CareDetailItem
             icon="leaf"
             label="Fertilizing"
             value={plant.careDetails.fertilizing}
+            currentTheme={currentTheme}
           />
 
           <CareDetailItem
             icon="scissors"
             label="Pruning"
             value={plant.careDetails.pruning}
+            currentTheme={currentTheme}
           />
 
           <CareDetailItem
             icon="chart-line"
             label="Growth"
             value={plant.careDetails.growthCharacteristics}
+            currentTheme={currentTheme}
           />
         </View>
 
         {/* Placement Tips */}
         {plant.careDetails.placement.length > 0 && (
           <View style={styles.placementContainer}>
-            <Text style={styles.sectionTitle}>Placement Tips</Text>
+            <Text
+              style={[styles.sectionTitle, { color: currentTheme.colorText }]}
+            >
+              Placement Tips
+            </Text>
             {plant.careDetails.placement.map((tip, index) => (
-              <View key={index} style={styles.tipItem}>
+              <View
+                key={index}
+                style={[
+                  styles.tipItem,
+                  { backgroundColor: currentTheme.colorSurface },
+                ]}
+              >
                 <FontAwesome6
                   name="lightbulb"
                   size={14}
-                  color={theme.colorLeafyGreen}
+                  color={currentTheme.colorLeafyGreen}
                 />
-                <Text style={styles.tipText}>{tip}</Text>
+                <Text
+                  style={[
+                    styles.tipText,
+                    { color: currentTheme.colorTextSecondary },
+                  ]}
+                >
+                  {tip}
+                </Text>
               </View>
             ))}
           </View>
@@ -590,16 +727,38 @@ export default function PlantDetailScreen() {
 
         {/* Common Issues */}
         {plant.careDetails.commonIssues.length > 0 && (
-          <View style={styles.issuesContainer}>
-            <Text style={styles.sectionTitle}>Common Issues</Text>
+          <View
+            style={[
+              styles.issuesContainer,
+              { backgroundColor: currentTheme.colorBackground },
+            ]}
+          >
+            <Text
+              style={[styles.sectionTitle, { color: currentTheme.colorText }]}
+            >
+              Common Issues
+            </Text>
             {plant.careDetails.commonIssues.map((issue, index) => (
-              <View key={index} style={styles.issueItem}>
+              <View
+                key={index}
+                style={[
+                  styles.issueItem,
+                  { backgroundColor: currentTheme.colorSurface },
+                ]}
+              >
                 <FontAwesome
                   name="exclamation-triangle"
                   size={14}
                   color="#ff9800"
                 />
-                <Text style={styles.issueText}>{issue}</Text>
+                <Text
+                  style={[
+                    styles.issueText,
+                    { color: currentTheme.colorTextSecondary },
+                  ]}
+                >
+                  {issue}
+                </Text>
               </View>
             ))}
           </View>
@@ -607,39 +766,60 @@ export default function PlantDetailScreen() {
 
         {/* Notes */}
         {plant.notes && (
-          <View style={styles.notesContainer}>
-            <Text style={styles.sectionTitle}>Notes</Text>
-            <Text style={styles.notesText}>{plant.notes}</Text>
+          <View
+            style={[
+              styles.notesContainer,
+              { backgroundColor: currentTheme.colorBackground },
+            ]}
+          >
+            <Text
+              style={[styles.sectionTitle, { color: currentTheme.colorText }]}
+            >
+              Notes
+            </Text>
+            <Text
+              style={[
+                styles.notesText,
+                {
+                  color: currentTheme.colorTextSecondary,
+                  backgroundColor: currentTheme.colorSurface,
+                },
+              ]}
+            >
+              {plant.notes}
+            </Text>
           </View>
         )}
 
         {/* Action Buttons */}
-        <View style={styles.actionButtonsContainer}>
+        <View
+          style={[
+            styles.actionButtonsContainer,
+            { backgroundColor: currentTheme.colorBackground },
+          ]}
+        >
           <TouchableOpacity
-            style={styles.waterButton}
+            style={[
+              styles.waterButton,
+              { flex: 1, backgroundColor: currentTheme.colorLeafyGreen },
+            ]}
             onPress={handleWaterPlant}
           >
-            <FontAwesome6 name="droplet" size={16} color={theme.colorWhite} />
-            <Text style={styles.waterButtonText}>Water Plant</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.testButton}
-            onPress={handleTestNotification}
-          >
-            <FontAwesome6 name="bell" size={16} color={theme.colorLeafyGreen} />
-            <Text style={styles.testButtonText}>Test Notification</Text>
+            <FontAwesome6
+              name="droplet"
+              size={16}
+              color={currentTheme.colorTextInverse}
+            />
+            <Text
+              style={[
+                styles.waterButtonText,
+                { color: currentTheme.colorTextInverse },
+              ]}
+            >
+              Water Plant
+            </Text>
           </TouchableOpacity>
         </View>
-
-        {/* Delete Button */}
-        <TouchableOpacity
-          style={styles.deleteButton}
-          onPress={handleDeletePlant}
-        >
-          <FontAwesome6 name="trash" size={16} color={theme.colorWhite} />
-          <Text style={styles.deleteButtonText}>Remove from Collection</Text>
-        </TouchableOpacity>
       </ScrollView>
     </View>
   );
@@ -648,7 +828,6 @@ export default function PlantDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colorWhite,
   },
   header: {
     flexDirection: "row",
@@ -666,7 +845,6 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: "700",
-    color: theme.colorLeafyGreen,
     flex: 1,
     textAlign: "center",
     marginHorizontal: 16,
@@ -680,7 +858,6 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     height: 300,
-    backgroundColor: "#f8f9fa",
   },
   plantImage: {
     width: "100%",
@@ -692,27 +869,21 @@ const styles = StyleSheet.create({
     height: "100%",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f0f0f0",
   },
   placeholderText: {
     fontSize: 16,
-    color: theme.colorGrey,
     marginTop: 12,
   },
   plantInfoContainer: {
     padding: 20,
-    backgroundColor: theme.colorWhite,
   },
   plantName: {
     fontSize: 28,
     fontWeight: "700",
-    color: theme.colorLeafyGreen,
     marginBottom: 8,
   },
   scientificName: {
     fontSize: 18,
-    fontStyle: "italic",
-    color: theme.colorGrey,
     marginBottom: 16,
   },
   metaInfo: {
@@ -722,21 +893,21 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
   },
   metaText: {
     fontSize: 14,
-    color: theme.colorGrey,
     marginLeft: 8,
   },
   taxonomyContainer: {
-    backgroundColor: "#f8f9fa",
     padding: 16,
     borderRadius: 12,
   },
   taxonomyTitle: {
     fontSize: 16,
     fontWeight: "600",
-    color: theme.colorLeafyGreen,
     marginBottom: 12,
   },
   taxonomyGrid: {
@@ -749,20 +920,18 @@ const styles = StyleSheet.create({
   },
   taxonomyLabel: {
     fontSize: 12,
-    color: theme.colorGrey,
     marginBottom: 4,
   },
   taxonomyValue: {
     fontSize: 14,
     fontWeight: "500",
-    color: theme.colorLeafyGreen,
   },
   commonNamesContainer: {
     marginTop: 8,
   },
   commonNamesText: {
     fontSize: 14,
-    color: theme.colorLeafyGreen,
+    fontStyle: "italic",
     fontWeight: "500",
   },
   wateringStatusContainer: {
@@ -771,7 +940,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginBottom: 20,
     padding: 16,
-    borderRadius: 12,
+    borderRadius: 15,
   },
   wateringStatusText: {
     marginLeft: 16,
@@ -779,11 +948,10 @@ const styles = StyleSheet.create({
   },
   wateringStatusTitle: {
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "500",
   },
   wateringStatusSubtitle: {
     fontSize: 14,
-    color: theme.colorGrey,
     marginTop: 2,
   },
   actionButtonsContainer: {
@@ -812,11 +980,9 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "700",
-    color: theme.colorLeafyGreen,
     marginBottom: 16,
   },
   careDetailItem: {
-    backgroundColor: "#f8f9fa",
     padding: 16,
     borderRadius: 8,
     marginBottom: 12,
@@ -829,7 +995,6 @@ const styles = StyleSheet.create({
   careDetailLabel: {
     fontSize: 14,
     fontWeight: "600",
-    color: theme.colorLeafyGreen,
     marginLeft: 8,
     flex: 1,
   },
@@ -838,7 +1003,6 @@ const styles = StyleSheet.create({
   },
   careDetailValue: {
     fontSize: 14,
-    color: theme.colorGrey,
     lineHeight: 20,
   },
   placementContainer: {
@@ -849,10 +1013,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
     marginBottom: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
   },
   tipText: {
     fontSize: 14,
-    color: theme.colorGrey,
     marginLeft: 12,
     flex: 1,
     lineHeight: 20,
@@ -865,10 +1031,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
     marginBottom: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
   },
   issueText: {
     fontSize: 14,
-    color: theme.colorGrey,
     marginLeft: 12,
     flex: 1,
     lineHeight: 20,
@@ -879,9 +1047,7 @@ const styles = StyleSheet.create({
   },
   notesText: {
     fontSize: 14,
-    color: theme.colorGrey,
     lineHeight: 22,
-    backgroundColor: "#f8f9fa",
     padding: 16,
     borderRadius: 8,
   },
@@ -889,16 +1055,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginHorizontal: 20,
+    marginRight: 10,
     paddingVertical: 16,
+    paddingHorizontal: 40,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "rgba(176, 174, 174, 0.8)",
-    backgroundColor: "rgba(122, 118, 118, 0.8)",
+    borderColor: "#b1b1b1ff",
   },
   deleteButtonText: {
     fontSize: 16,
-    color: theme.colorWhite,
     fontWeight: "600",
     marginLeft: 8,
   },
@@ -909,7 +1074,6 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 16,
-    color: theme.colorGrey,
     marginTop: 16,
   },
   waterButton: {
@@ -919,28 +1083,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingVertical: 16,
     borderRadius: 8,
-    backgroundColor: theme.colorLeafyGreen,
   },
   waterButtonText: {
     fontSize: 16,
-    color: theme.colorWhite,
-    fontWeight: "600",
-    marginLeft: 8,
-  },
-  testButton: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 16,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: theme.colorLeafyGreen,
-    backgroundColor: theme.colorWhite,
-  },
-  testButtonText: {
-    fontSize: 16,
-    color: theme.colorLeafyGreen,
     fontWeight: "600",
     marginLeft: 8,
   },

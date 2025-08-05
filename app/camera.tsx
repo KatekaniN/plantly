@@ -6,20 +6,25 @@ import {
   useWindowDimensions,
   TouchableOpacity,
   Alert,
+  StatusBar,
 } from "react-native";
 import * as MediaLibrary from "expo-media-library";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { theme } from "@/theme";
+import { useTheme } from "@/contexts/ThemeContext";
 import { OnboardingButton } from "@/components/OnboardingButton";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
 import { MediaType } from "expo-media-library";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function NewScreen() {
   const { width } = useWindowDimensions();
   const imageSize = Math.min(width / 3, 300); // 1.1, 400
   const router = useRouter();
+  const { theme: currentTheme, isDark } = useTheme();
+  const insets = useSafeAreaInsets();
 
   const validateAndProcessImage = async (imageUri: string): Promise<string> => {
     try {
@@ -188,26 +193,60 @@ export default function NewScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: currentTheme.colorBackground,
+          paddingTop: insets.top,
+        },
+      ]}
+    >
+      <StatusBar
+        barStyle={isDark ? "light-content" : "dark-content"}
+        backgroundColor={currentTheme.colorBackground}
+      />
+
       {/* Header section */}
-      <View style={styles.headerContainer}>
-        <Text style={styles.title}>
+      <View
+        style={[
+          styles.headerContainer,
+          { backgroundColor: currentTheme.colorBackground },
+        ]}
+      >
+        <Text style={[styles.title, { color: currentTheme.colorText }]}>
           Add your new green friend
           <FontAwesome6
             name="seedling"
             size={24}
-            color={theme.colorLeafyGreen}
+            color={currentTheme.colorLeafyGreen}
             style={{ marginLeft: 8 }}
           />
         </Text>
-        <Text style={styles.subtitle}>Upload a picture from your gallery</Text>
+        <Text
+          style={[styles.subtitle, { color: currentTheme.colorTextSecondary }]}
+        >
+          Upload a picture from your gallery
+        </Text>
       </View>
 
-      <View style={styles.uploadSection}>
+      <View
+        style={[
+          styles.uploadSection,
+          { backgroundColor: currentTheme.colorBackground },
+        ]}
+      >
         <TouchableOpacity
           style={[
             styles.uploadContainer,
-            { width: imageSize * 5, height: imageSize * 5 },
+            {
+              width: imageSize * 5,
+              height: imageSize * 5,
+              backgroundColor: isDark ? '#2a2a2a' : '#f8f9fa',
+              borderColor: isDark ? '#404040' : '#e0e0e0',
+              borderWidth: 2,
+              borderStyle: 'dashed',
+            },
           ]}
           onPress={pickImageFromGallery}
         >
@@ -215,17 +254,35 @@ export default function NewScreen() {
             source={require("@/assets/images/upload-image.png")}
             style={[
               styles.uploadImage,
-              { width: imageSize * 3.5, height: imageSize * 3 },
+              { 
+                width: imageSize * 2.5, 
+                height: imageSize * 2,
+                tintColor: currentTheme.colorTextSecondary,
+              },
             ]}
             resizeMode="contain"
           />
+          <Text style={[styles.uploadText, { color: currentTheme.colorText }]}>
+            Upload
+          </Text>
         </TouchableOpacity>
       </View>
 
       {/* Bottom section */}
-      <View style={styles.bottomContainer}>
-        <Text style={styles.orText}>Or</Text>
-        <Text style={styles.cameraText}>Take a picture with your camera</Text>
+      <View
+        style={[
+          styles.bottomContainer,
+          { backgroundColor: currentTheme.colorBackground },
+        ]}
+      >
+        <Text
+          style={[styles.orText, { color: currentTheme.colorTextSecondary }]}
+        >
+          Or
+        </Text>
+        <Text style={[styles.cameraText, { color: currentTheme.colorText }]}>
+          Take a picture with your camera
+        </Text>
         <OnboardingButton
           title="Open Camera"
           onPress={takePhotoWithCamera}
@@ -239,7 +296,6 @@ export default function NewScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colorWhite,
     paddingHorizontal: 20,
     paddingTop: 60,
   },
@@ -250,14 +306,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: "700",
-    color: theme.colorDarkGreen,
     textAlign: "center",
     marginBottom: 12,
     lineHeight: 34,
   },
   subtitle: {
     fontSize: 16,
-    color: theme.colorGrey,
     textAlign: "center",
     fontWeight: "400",
   },
@@ -268,14 +322,18 @@ const styles = StyleSheet.create({
   },
   uploadContainer: {
     borderRadius: 20,
-    backgroundColor: theme.colorWhite,
     padding: 15,
     alignItems: "center",
     justifyContent: "center",
   },
   uploadImage: {
-    bottom: "30%",
     borderRadius: 15,
+    marginBottom: 12,
+  },
+  uploadText: {
+    fontSize: 18,
+    fontWeight: "600",
+    textAlign: "center",
   },
   bottomContainer: {
     alignItems: "center",
@@ -285,13 +343,11 @@ const styles = StyleSheet.create({
   },
   orText: {
     fontSize: 16,
-    color: theme.colorGrey,
     fontWeight: "500",
     marginBottom: 16,
   },
   cameraText: {
     fontSize: 16,
-    color: theme.colorDarkGreen,
     textAlign: "center",
     marginBottom: 24,
     fontWeight: "500",

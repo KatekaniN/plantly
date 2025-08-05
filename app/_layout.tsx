@@ -5,8 +5,11 @@ import { Stack } from "expo-router";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { theme } from "@/theme";
 import notificationService from "@/services/notificationService";
+import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
 
-export default function Layout() {
+function StackNavigator() {
+  const { theme: currentTheme } = useTheme();
+
   useEffect(() => {
     // Initialize notifications when app starts
     notificationService.initialize().then((success) => {
@@ -19,7 +22,7 @@ export default function Layout() {
   }, []);
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#fff" }}>
+    <View style={{ flex: 1, backgroundColor: currentTheme.colorBackground }}>
       <Stack>
         <Stack.Screen
           name="(tabs)"
@@ -38,7 +41,7 @@ export default function Layout() {
               <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <Text
                   style={{
-                    color: theme.colorLeafyGreen,
+                    color: currentTheme.colorLeafyGreen,
                     fontSize: 20,
                     fontWeight: "600",
                   }}
@@ -75,7 +78,42 @@ export default function Layout() {
             presentation: "modal",
           }}
         />
+        <Stack.Screen
+          name="plantIdentification"
+          options={{
+            animation: "slide_from_right",
+            headerShown: false,
+            title: "Plant Identification",
+            presentation: "modal",
+          }}
+        />
+        <Stack.Screen
+          name="notification-settings"
+          options={{
+            animation: "slide_from_right",
+            headerShown: false,
+            title: "Notification Settings",
+            presentation: "modal",
+          }}
+        />
+        <Stack.Screen
+          name="edit-plant/[id]"
+          options={{
+            animation: "slide_from_right",
+            headerShown: false,
+            title: "Edit Plant",
+            presentation: "modal",
+          }}
+        />
       </Stack>
     </View>
+  );
+}
+
+export default function Layout() {
+  return (
+    <ThemeProvider>
+      <StackNavigator />
+    </ThemeProvider>
   );
 }

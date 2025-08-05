@@ -1,6 +1,7 @@
 import { Link, Redirect, Tabs } from "expo-router";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { theme } from "@/theme";
+import { useTheme } from "@/contexts/ThemeContext";
 import Entypo from "@expo/vector-icons/Entypo";
 import { useUserStore } from "@/store/userStore";
 import { TouchableOpacity } from "react-native";
@@ -10,6 +11,7 @@ export default function Layout() {
   const hasFinishedOnboarding = useUserStore(
     (state) => state.hasFinishedOnboarding
   );
+  const { theme: currentTheme } = useTheme();
 
   if (!hasFinishedOnboarding) {
     return <Redirect href="/onboarding" />;
@@ -18,10 +20,21 @@ export default function Layout() {
   return (
     <Tabs
       screenOptions={{
-        sceneStyle: { paddingTop: 8, paddingBottom: 8 },
-        tabBarActiveTintColor: theme.colorGreen,
-        tabBarInactiveTintColor: theme.colorGrey,
-
+        sceneStyle: {
+          paddingTop: 8,
+          paddingBottom: 8,
+          backgroundColor: currentTheme.colorBackground,
+        },
+        tabBarActiveTintColor: currentTheme.colorLeafyGreen,
+        tabBarInactiveTintColor: currentTheme.colorTextSecondary,
+        tabBarStyle: {
+          backgroundColor: currentTheme.colorSurface,
+          borderTopColor: currentTheme.colorBorder,
+        },
+        headerStyle: {
+          backgroundColor: currentTheme.colorBackground,
+        },
+        headerTintColor: currentTheme.colorText,
         tabBarShowLabel: false,
       }}
     >
@@ -32,7 +45,7 @@ export default function Layout() {
           title: "Home",
           headerTitle: "",
           headerShadowVisible: false,
-        
+
           tabBarIcon: ({ size, color }) => (
             <Entypo name="leaf" size={size} color={color} />
           ),

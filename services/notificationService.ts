@@ -19,6 +19,15 @@ export interface NotificationData extends Record<string, unknown> {
   type: "watering" | "fertilizing" | "general";
 }
 
+export interface UserNotificationPreferences {
+  reminderTime: { hour: number; minute: number };
+  dayBeforeTime: { hour: number; minute: number };
+  overdueTime: { hour: number; minute: number };
+  enableNotifications: boolean;
+  enableDayBeforeReminders: boolean;
+  enableOverdueReminders: boolean;
+}
+
 class NotificationService {
   private static instance: NotificationService;
   private expoPushToken: string | null = null;
@@ -87,20 +96,26 @@ class NotificationService {
     plantId: string,
     plantName: string,
     wateringDate: Date,
-    identifier?: string
+    identifier?: string,
+    customTime?: { hour: number; minute: number }
   ): Promise<string | null> {
     try {
       const notificationId = identifier || `watering-${plantId}-${Date.now()}`;
 
-      // Calculate trigger time (9 AM on the watering date)
+      // Calculate trigger time (use custom time or default to 9 AM)
       const triggerDate = new Date(wateringDate);
-      triggerDate.setHours(9, 0, 0, 0);
+      const timeToUse = customTime || { hour: 9, minute: 0 };
+      triggerDate.setHours(timeToUse.hour, timeToUse.minute, 0, 0);
 
       // Don't schedule if the date is in the past
       if (triggerDate <= new Date()) {
         console.log("⏰ Skipping past date notification for", plantName);
         return null;
       }
+
+      console.log(
+        `📅 Scheduling notification for ${plantName} at ${triggerDate.toLocaleString()}`
+      );
 
       await Notifications.scheduleNotificationAsync({
         identifier: notificationId,
@@ -114,20 +129,29 @@ class NotificationService {
             scheduledFor: wateringDate.toISOString(),
           } as NotificationData & { scheduledFor: string },
           sound: "default",
-          priority: Notifications.AndroidNotificationPriority.HIGH,
+          ...(Platform.OS === "android" && {
+            priority: Notifications.AndroidNotificationPriority.HIGH,
+          }),
         },
-        trigger: {
-          date: triggerDate,
-          channelId: "plant-care",
-        },
+        trigger:
+          Platform.OS === "android"
+            ? {
+                type: Notifications.SchedulableTriggerInputTypes.DATE,
+                date: triggerDate,
+                channelId: "plant-care",
+              }
+            : {
+                type: Notifications.SchedulableTriggerInputTypes.DATE,
+                date: triggerDate,
+              },
       });
 
       console.log(
-        `📅 Scheduled watering reminder for ${plantName} at ${triggerDate.toLocaleString()}`
+        `✅ Successfully scheduled watering reminder for ${plantName} at ${triggerDate.toLocaleString()}`
       );
       return notificationId;
     } catch (error) {
-      console.error("Error scheduling watering reminder:", error);
+      console.error("❌ Error scheduling watering reminder:", error);
       return null;
     }
   }
@@ -136,22 +160,87 @@ class NotificationService {
   async scheduleComprehensiveWateringReminders(
     plantId: string,
     plantName: string,
-    wateringDate: Date
+    wateringDate: Date,
+    userPreferences?: UserNotificationPreferences
   ): Promise<string[]> {
     const scheduledIds: string[] = [];
 
-    try {
-      // 1. Day before reminder (8 PM)
-      const dayBefore = new Date(wateringDate);
-      dayBefore.setDate(dayBefore.getDate() - 1);
-      dayBefore.setHours(20, 0, 0, 0);
+    // Use default preferences if none provided
+    const prefs = userPreferences || {
+      reminderTime: { hour: 9, minute: 0 },
+      dayBeforeTime: { hour: 20, minute: 0 },
+      overdueTime: { hour: 18, minute: 0 },
+      enableNotifications: true,
+      enableDayBeforeReminders: true,
+      enableOverdueReminders: true,
+    };
 
-      if (dayBefore > new Date()) {
-        const dayBeforeId = await Notifications.scheduleNotificationAsync({
-          identifier: `watering-reminder-${plantId}-${Date.now()}`,
+    if (!prefs.enableNotifications) {
+      console.log("🔕 Notifications disabled, skipping scheduling");
+      return scheduledIds;
+    }
+
+    try {
+      // 1. Day before reminder (custom time or 8 PM)
+      if (prefs.enableDayBeforeReminders) {
+        const dayBefore = new Date(wateringDate);
+        dayBefore.setDate(dayBefore.getDate() - 1);
+        dayBefore.setHours(
+          prefs.dayBeforeTime.hour,
+          prefs.dayBeforeTime.minute,
+          0,
+          0
+        );
+
+        if (dayBefore > new Date()) {
+          const dayBeforeId = await Notifications.scheduleNotificationAsync({
+            identifier: `watering-reminder-${plantId}-${Date.now()}`,
+            content: {
+              title: `🌿 ${plantName} reminder`,
+              body: `Tomorrow is watering day for your ${plantName}. Get ready! 🗓️`,
+              data: {
+                plantId,
+                plantName,
+                type: "watering",
+                scheduledFor: wateringDate.toISOString(),
+              } as NotificationData & { scheduledFor: string },
+              sound: "default",
+            },
+            trigger: {
+              date: dayBefore,
+              channelId: "plant-care",
+            },
+          });
+          scheduledIds.push(dayBeforeId);
+        }
+      }
+
+      // 2. Day of reminder (custom time or 9 AM)
+      const dayOfId = await this.scheduleWateringReminder(
+        plantId,
+        plantName,
+        wateringDate,
+        `watering-dayof-${plantId}-${Date.now()}`,
+        prefs.reminderTime
+      );
+      if (dayOfId) scheduledIds.push(dayOfId);
+
+      // 3. Overdue reminder (custom time or 6 PM next day)
+      if (prefs.enableOverdueReminders) {
+        const overdue = new Date(wateringDate);
+        overdue.setDate(overdue.getDate() + 1);
+        overdue.setHours(
+          prefs.overdueTime.hour,
+          prefs.overdueTime.minute,
+          0,
+          0
+        );
+
+        const overdueId = await Notifications.scheduleNotificationAsync({
+          identifier: `watering-overdue-${plantId}-${Date.now()}`,
           content: {
-            title: `🌿 ${plantName} reminder`,
-            body: `Tomorrow is watering day for your ${plantName}. Get ready! 🗓️`,
+            title: `🚨 ${plantName} needs water!`,
+            body: `Your ${plantName} is overdue for watering. Please check on it soon! 🆘`,
             data: {
               plantId,
               plantName,
@@ -159,52 +248,18 @@ class NotificationService {
               scheduledFor: wateringDate.toISOString(),
             } as NotificationData & { scheduledFor: string },
             sound: "default",
+            priority: Notifications.AndroidNotificationPriority.HIGH,
           },
           trigger: {
-            date: dayBefore,
+            date: overdue,
             channelId: "plant-care",
           },
         });
-        scheduledIds.push(dayBeforeId);
+        scheduledIds.push(overdueId);
       }
 
-      // 2. Day of reminder (9 AM)
-      const dayOfId = await this.scheduleWateringReminder(
-        plantId,
-        plantName,
-        wateringDate,
-        `watering-dayof-${plantId}-${Date.now()}`
-      );
-      if (dayOfId) scheduledIds.push(dayOfId);
-
-      // 3. Overdue reminder (next day at 6 PM if not watered)
-      const overdue = new Date(wateringDate);
-      overdue.setDate(overdue.getDate() + 1);
-      overdue.setHours(18, 0, 0, 0);
-
-      const overdueId = await Notifications.scheduleNotificationAsync({
-        identifier: `watering-overdue-${plantId}-${Date.now()}`,
-        content: {
-          title: `🚨 ${plantName} needs water!`,
-          body: `Your ${plantName} is overdue for watering. Please check on it soon! 🆘`,
-          data: {
-            plantId,
-            plantName,
-            type: "watering",
-            scheduledFor: wateringDate.toISOString(),
-          } as NotificationData & { scheduledFor: string },
-          sound: "default",
-          priority: Notifications.AndroidNotificationPriority.HIGH,
-        },
-        trigger: {
-          date: overdue,
-          channelId: "plant-care",
-        },
-      });
-      scheduledIds.push(overdueId);
-
       console.log(
-        `📱 Scheduled ${scheduledIds.length} reminders for ${plantName}`
+        `📱 Scheduled ${scheduledIds.length} reminders for ${plantName} with custom times`
       );
       return scheduledIds;
     } catch (error) {
@@ -271,22 +326,5 @@ class NotificationService {
       console.error("Error clearing notifications:", error);
     }
   }
-
-  // Send immediate notification (for testing)
-  async sendTestNotification(plantName: string): Promise<void> {
-    try {
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: `🧪 Test notification`,
-          body: `This is a test notification for ${plantName}!`,
-          data: { type: "test" },
-        },
-        trigger: null,
-      });
-    } catch (error) {
-      console.error("Error sending test notification:", error);
-    }
-  }
 }
-
 export default NotificationService.getInstance();

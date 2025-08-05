@@ -15,6 +15,7 @@ import {
   StatusBar,
 } from "react-native";
 import { theme } from "@/theme";
+import { useTheme } from "@/contexts/ThemeContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Slider from "@react-native-community/slider"; // You'll need to install this
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
@@ -40,11 +41,13 @@ const WATERING_OPTIONS = [
 interface EditableCareDetailProps {
   careDetails: any;
   onUpdate: (field: string, value: string | string[]) => void;
+  currentTheme: any;
 }
 
 const EditableCareDetails: React.FC<EditableCareDetailProps> = ({
   careDetails,
   onUpdate,
+  currentTheme,
 }) => {
   const getCurrentWateringValue = () => {
     if (!careDetails.wateringFrequency) return 7; // default to weekly
@@ -134,22 +137,45 @@ const EditableCareDetails: React.FC<EditableCareDetailProps> = ({
   };
 
   return (
-    <View style={styles.careDetailsContainer}>
+    <View
+      style={[
+        styles.careDetailsContainer,
+        { backgroundColor: currentTheme.colorBackground },
+      ]}
+    >
       {/* Watering Section */}
-      <View style={styles.careSection}>
+      <View
+        style={[
+          styles.careSection,
+          { backgroundColor: currentTheme.colorSurface },
+        ]}
+      >
         <View style={styles.careSectionTitleContainer}>
           <FontAwesome6
             name="droplet"
             size={18}
-            color={theme.colorLeafyGreen}
+            color={currentTheme.colorLeafyGreen}
           />
-          <Text style={styles.careSectionTitle}>Watering</Text>
+          <Text
+            style={[styles.careSectionTitle, { color: currentTheme.colorText }]}
+          >
+            Watering
+          </Text>
         </View>
 
         <View style={styles.careItem}>
-          <Text style={styles.careLabel}>Frequency</Text>
+          <Text style={[styles.careLabel, { color: currentTheme.colorText }]}>
+            Frequency
+          </Text>
           <View style={styles.sliderContainer}>
-            <Text style={styles.sliderLabel}>Less Often</Text>
+            <Text
+              style={[
+                styles.sliderLabel,
+                { color: currentTheme.colorTextSecondary },
+              ]}
+            >
+              Less Often
+            </Text>
             <Slider
               style={styles.slider}
               minimumValue={1}
@@ -157,21 +183,38 @@ const EditableCareDetails: React.FC<EditableCareDetailProps> = ({
               value={wateringValue}
               onValueChange={handleWateringChange}
               step={1}
-              minimumTrackTintColor={theme.colorLeafyGreen}
-              maximumTrackTintColor="#E0E0E0"
+              minimumTrackTintColor={currentTheme.colorLeafyGreen}
+              maximumTrackTintColor={currentTheme.colorTextSecondary}
             />
-            <Text style={styles.sliderLabel}>More Often</Text>
+            <Text
+              style={[
+                styles.sliderLabel,
+                { color: currentTheme.colorTextSecondary },
+              ]}
+            >
+              More Often
+            </Text>
           </View>
-          <Text style={styles.sliderValue}>
+          <Text style={[styles.sliderValue, { color: currentTheme.colorText }]}>
             {WATERING_OPTIONS.find((opt) => opt.value === wateringValue)
               ?.label || `Every ${wateringValue} days`}
           </Text>
         </View>
 
         <View style={styles.careItem}>
-          <Text style={styles.careLabel}>Amount</Text>
+          <Text style={[styles.careLabel, { color: currentTheme.colorText }]}>
+            Amount
+          </Text>
           <TextInput
-            style={styles.careInput}
+            style={[
+              styles.careInput,
+              {
+                backgroundColor: currentTheme.colorBackground,
+                borderColor: currentTheme.colorBorder || "#e0e0e0",
+                color: currentTheme.colorText,
+              },
+            ]}
+            placeholderTextColor={currentTheme.colorTextSecondary}
             value={careDetails.wateringAmount}
             onChangeText={(text) => onUpdate("wateringAmount", text)}
             placeholder="e.g., Water thoroughly until drainage"
@@ -180,16 +223,39 @@ const EditableCareDetails: React.FC<EditableCareDetailProps> = ({
       </View>
 
       {/* Light & Environment Section */}
-      <View style={styles.careSection}>
+      <View
+        style={[
+          styles.careSection,
+          { backgroundColor: currentTheme.colorSurface },
+        ]}
+      >
         <View style={styles.careSectionTitleContainer}>
-          <FontAwesome6 name="sun" size={18} color={theme.colorLeafyGreen} />
-          <Text style={styles.careSectionTitle}>Light & Environment</Text>
+          <FontAwesome6
+            name="sun"
+            size={18}
+            color={currentTheme.colorLeafyGreen}
+          />
+          <Text
+            style={[styles.careSectionTitle, { color: currentTheme.colorText }]}
+          >
+            Light & Environment
+          </Text>
         </View>
 
         <View style={styles.careItem}>
-          <Text style={styles.careLabel}>Sunlight Requirement</Text>
+          <Text style={[styles.careLabel, { color: currentTheme.colorText }]}>
+            Sunlight Requirement
+          </Text>
           <TextInput
-            style={styles.careInput}
+            style={[
+              styles.careInput,
+              {
+                backgroundColor: currentTheme.colorBackground,
+                borderColor: currentTheme.colorBorder || "#e0e0e0",
+                color: currentTheme.colorText,
+              },
+            ]}
+            placeholderTextColor={currentTheme.colorTextSecondary}
             value={careDetails.sunlightRequirement}
             onChangeText={(text) => onUpdate("sunlightRequirement", text)}
             placeholder="e.g., Bright, indirect light"
@@ -197,9 +263,19 @@ const EditableCareDetails: React.FC<EditableCareDetailProps> = ({
         </View>
 
         <View style={styles.careItem}>
-          <Text style={styles.careLabel}>Temperature Range</Text>
+          <Text style={[styles.careLabel, { color: currentTheme.colorText }]}>
+            Temperature Range
+          </Text>
           <TextInput
-            style={styles.careInput}
+            style={[
+              styles.careInput,
+              {
+                backgroundColor: currentTheme.colorBackground,
+                borderColor: currentTheme.colorBorder || "#e0e0e0",
+                color: currentTheme.colorText,
+              },
+            ]}
+            placeholderTextColor={currentTheme.colorTextSecondary}
             value={careDetails.temperature}
             onChangeText={(text) => onUpdate("temperature", text)}
             placeholder="e.g., 18-24°C"
@@ -207,9 +283,19 @@ const EditableCareDetails: React.FC<EditableCareDetailProps> = ({
         </View>
 
         <View style={styles.careItem}>
-          <Text style={styles.careLabel}>Humidity</Text>
+          <Text style={[styles.careLabel, { color: currentTheme.colorText }]}>
+            Humidity
+          </Text>
           <TextInput
-            style={styles.careInput}
+            style={[
+              styles.careInput,
+              {
+                backgroundColor: currentTheme.colorBackground,
+                borderColor: currentTheme.colorBorder || "#e0e0e0",
+                color: currentTheme.colorText,
+              },
+            ]}
+            placeholderTextColor={currentTheme.colorTextSecondary}
             value={careDetails.humidity}
             onChangeText={(text) => onUpdate("humidity", text)}
             placeholder="e.g., 40-60%"
@@ -218,20 +304,39 @@ const EditableCareDetails: React.FC<EditableCareDetailProps> = ({
       </View>
 
       {/* Soil & Fertilizing Section */}
-      <View style={styles.careSection}>
+      <View
+        style={[
+          styles.careSection,
+          { backgroundColor: currentTheme.colorSurface },
+        ]}
+      >
         <View style={styles.careSectionTitleContainer}>
           <FontAwesome6
             name="seedling"
             size={18}
-            color={theme.colorLeafyGreen}
+            color={currentTheme.colorLeafyGreen}
           />
-          <Text style={styles.careSectionTitle}>Soil & Fertilizing</Text>
+          <Text
+            style={[styles.careSectionTitle, { color: currentTheme.colorText }]}
+          >
+            Soil & Fertilizing
+          </Text>
         </View>
 
         <View style={styles.careItem}>
-          <Text style={styles.careLabel}>Soil Type</Text>
+          <Text style={[styles.careLabel, { color: currentTheme.colorText }]}>
+            Soil Type
+          </Text>
           <TextInput
-            style={styles.careInput}
+            style={[
+              styles.careInput,
+              {
+                backgroundColor: currentTheme.colorBackground,
+                borderColor: currentTheme.colorBorder || "#e0e0e0",
+                color: currentTheme.colorText,
+              },
+            ]}
+            placeholderTextColor={currentTheme.colorTextSecondary}
             value={careDetails.soilType}
             onChangeText={(text) => onUpdate("soilType", text)}
             placeholder="e.g., Well-draining potting mix"
@@ -239,9 +344,19 @@ const EditableCareDetails: React.FC<EditableCareDetailProps> = ({
         </View>
 
         <View style={styles.careItem}>
-          <Text style={styles.careLabel}>Fertilizing</Text>
+          <Text style={[styles.careLabel, { color: currentTheme.colorText }]}>
+            Fertilizing
+          </Text>
           <TextInput
-            style={styles.careInput}
+            style={[
+              styles.careInput,
+              {
+                backgroundColor: currentTheme.colorBackground,
+                borderColor: currentTheme.colorBorder || "#e0e0e0",
+                color: currentTheme.colorText,
+              },
+            ]}
+            placeholderTextColor={currentTheme.colorTextSecondary}
             value={careDetails.fertilizing}
             onChangeText={(text) => onUpdate("fertilizing", text)}
             placeholder="e.g., Monthly during growing season"
@@ -250,20 +365,40 @@ const EditableCareDetails: React.FC<EditableCareDetailProps> = ({
       </View>
 
       {/* Growth & Maintenance Section */}
-      <View style={styles.careSection}>
+      <View
+        style={[
+          styles.careSection,
+          { backgroundColor: currentTheme.colorSurface },
+        ]}
+      >
         <View style={styles.careSectionTitleContainer}>
           <FontAwesome6
             name="chart-line"
             size={18}
-            color={theme.colorLeafyGreen}
+            color={currentTheme.colorLeafyGreen}
           />
-          <Text style={styles.careSectionTitle}>Growth & Maintenance</Text>
+          <Text
+            style={[styles.careSectionTitle, { color: currentTheme.colorText }]}
+          >
+            Growth & Maintenance
+          </Text>
         </View>
 
         <View style={styles.careItem}>
-          <Text style={styles.careLabel}>Growth Characteristics</Text>
+          <Text style={[styles.careLabel, { color: currentTheme.colorText }]}>
+            Growth Characteristics
+          </Text>
           <TextInput
-            style={[styles.careInput, styles.multilineInput]}
+            style={[
+              styles.careInput,
+              styles.multilineInput,
+              {
+                backgroundColor: currentTheme.colorBackground,
+                borderColor: currentTheme.colorBorder || "#e0e0e0",
+                color: currentTheme.colorText,
+              },
+            ]}
+            placeholderTextColor={currentTheme.colorTextSecondary}
             value={careDetails.growthCharacteristics}
             onChangeText={(text) => onUpdate("growthCharacteristics", text)}
             placeholder="e.g., Moderate growth rate"
@@ -272,9 +407,20 @@ const EditableCareDetails: React.FC<EditableCareDetailProps> = ({
         </View>
 
         <View style={styles.careItem}>
-          <Text style={styles.careLabel}>Pruning</Text>
+          <Text style={[styles.careLabel, { color: currentTheme.colorText }]}>
+            Pruning
+          </Text>
           <TextInput
-            style={[styles.careInput, styles.multilineInput]}
+            style={[
+              styles.careInput,
+              styles.multilineInput,
+              {
+                backgroundColor: currentTheme.colorBackground,
+                borderColor: currentTheme.colorBorder || "#e0e0e0",
+                color: currentTheme.colorText,
+              },
+            ]}
+            placeholderTextColor={currentTheme.colorTextSecondary}
             value={careDetails.pruning}
             onChangeText={(text) => onUpdate("pruning", text)}
             placeholder="e.g., Remove dead or yellowing leaves"
@@ -284,20 +430,40 @@ const EditableCareDetails: React.FC<EditableCareDetailProps> = ({
       </View>
 
       {/* Placement & Issues Section */}
-      <View style={styles.careSection}>
+      <View
+        style={[
+          styles.careSection,
+          { backgroundColor: currentTheme.colorSurface },
+        ]}
+      >
         <View style={styles.careSectionTitleContainer}>
           <FontAwesome6
             name="house-chimney"
             size={18}
-            color={theme.colorLeafyGreen}
+            color={currentTheme.colorLeafyGreen}
           />
-          <Text style={styles.careSectionTitle}>Placement & Common Issues</Text>
+          <Text
+            style={[styles.careSectionTitle, { color: currentTheme.colorText }]}
+          >
+            Placement & Common Issues
+          </Text>
         </View>
 
         <View style={styles.careItem}>
-          <Text style={styles.careLabel}>Placement Tips</Text>
+          <Text style={[styles.careLabel, { color: currentTheme.colorText }]}>
+            Placement Tips
+          </Text>
           <TextInput
-            style={[styles.careInput, styles.multilineInput]}
+            style={[
+              styles.careInput,
+              styles.multilineInput,
+              {
+                backgroundColor: currentTheme.colorBackground,
+                borderColor: currentTheme.colorBorder || "#e0e0e0",
+                color: currentTheme.colorText,
+              },
+            ]}
+            placeholderTextColor={currentTheme.colorTextSecondary}
             value={careDetails.placement?.join(", ") || ""}
             onChangeText={(text) =>
               onUpdate(
@@ -311,9 +477,20 @@ const EditableCareDetails: React.FC<EditableCareDetailProps> = ({
         </View>
 
         <View style={styles.careItem}>
-          <Text style={styles.careLabel}>Common Issues</Text>
+          <Text style={[styles.careLabel, { color: currentTheme.colorText }]}>
+            Common Issues
+          </Text>
           <TextInput
-            style={[styles.careInput, styles.multilineInput]}
+            style={[
+              styles.careInput,
+              styles.multilineInput,
+              {
+                backgroundColor: currentTheme.colorBackground,
+                borderColor: currentTheme.colorBorder || "#e0e0e0",
+                color: currentTheme.colorText,
+              },
+            ]}
+            placeholderTextColor={currentTheme.colorTextSecondary}
             value={careDetails.commonIssues?.join(", ") || ""}
             onChangeText={(text) =>
               onUpdate(
@@ -333,6 +510,7 @@ const EditableCareDetails: React.FC<EditableCareDetailProps> = ({
 const PlantDetailsReview: React.FC = () => {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { theme: currentTheme, isDark } = useTheme();
   const {
     selectedPlant,
     careDetails,
@@ -447,8 +625,19 @@ const PlantDetailsReview: React.FC = () => {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+    <View
+      style={[
+        styles.container,
+        {
+          paddingTop: insets.top,
+          backgroundColor: currentTheme.colorBackground,
+        },
+      ]}
+    >
+      <StatusBar
+        barStyle={isDark ? "light-content" : "dark-content"}
+        backgroundColor={currentTheme.colorBackground}
+      />
 
       <ScrollView
         style={styles.scrollContainer}
@@ -459,20 +648,35 @@ const PlantDetailsReview: React.FC = () => {
         showsVerticalScrollIndicator={false}
       >
         {/* Plant Image */}
-        <View style={styles.imageContainer}>
+        <View
+          style={[
+            styles.imageContainer,
+            { backgroundColor: currentTheme.colorSurface },
+          ]}
+        >
           <Image source={{ uri: currentImageUri }} style={styles.plantImage} />
         </View>
 
         {/* Care Data Source Indicator */}
         {careDataSource && (
-          <View style={styles.careSourceIndicator}>
-            <Text style={styles.careSourceText}>
+          <View
+            style={[
+              styles.careSourceIndicator,
+              { backgroundColor: currentTheme.colorSurface },
+            ]}
+          >
+            <Text
+              style={[
+                styles.careSourceText,
+                { color: currentTheme.colorTextSecondary },
+              ]}
+            >
               {careDataSource === "default" && (
                 <>
                   <FontAwesome6
                     name="seedling"
                     size={14}
-                    color={theme.colorLeafyGreen}
+                    color={currentTheme.colorLeafyGreen}
                   />{" "}
                   Plant family-based care recommendations
                 </>
@@ -483,22 +687,52 @@ const PlantDetailsReview: React.FC = () => {
 
         {/* Loading State for Care Details */}
         {isFetchingCareDetails && (
-          <View style={styles.loadingCareContainer}>
-            <ActivityIndicator size="small" color={theme.colorLeafyGreen} />
-            <Text style={styles.loadingCareText}>
+          <View
+            style={[
+              styles.loadingCareContainer,
+              { backgroundColor: currentTheme.colorSurface },
+            ]}
+          >
+            <ActivityIndicator
+              size="small"
+              color={currentTheme.colorLeafyGreen}
+            />
+            <Text
+              style={[
+                styles.loadingCareText,
+                { color: currentTheme.colorText },
+              ]}
+            >
               Generating personalized care recommendations...
             </Text>
           </View>
         )}
 
         {/* Plant Identification Info */}
-        <View style={styles.identificationContainer}>
+        <View
+          style={[
+            styles.identificationContainer,
+            { backgroundColor: currentTheme.colorSurface },
+          ]}
+        >
           <View style={styles.identificationHeader}>
-            <Text style={styles.scientificName}>
+            <Text
+              style={[styles.scientificName, { color: currentTheme.colorText }]}
+            >
               {selectedPlant.species.scientificNameWithoutAuthor}
             </Text>
-            <View style={styles.confidenceBadge}>
-              <Text style={styles.confidenceText}>
+            <View
+              style={[
+                styles.confidenceBadge,
+                { backgroundColor: currentTheme.colorLeafyGreen },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.confidenceText,
+                  { color: currentTheme.colorTextInverse },
+                ]}
+              >
                 {formatConfidenceScore(selectedPlant.score)} match
               </Text>
             </View>
@@ -522,33 +756,94 @@ const PlantDetailsReview: React.FC = () => {
         </View>
 
         {/* Custom Plant Details */}
-        <View style={styles.customDetailsContainer}>
-          <Text style={styles.sectionTitle}>Your Plant Details</Text>
+        <View
+          style={[
+            styles.customDetailsContainer,
+            { backgroundColor: currentTheme.colorBackground },
+          ]}
+        >
+          <Text
+            style={[styles.sectionTitle, { color: currentTheme.colorText }]}
+          >
+            Your Plant Details
+          </Text>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Plant Name</Text>
+          <View
+            style={[
+              styles.inputContainer,
+              { backgroundColor: currentTheme.colorSurface },
+            ]}
+          >
+            <Text
+              style={[styles.inputLabel, { color: currentTheme.colorText }]}
+            >
+              Plant Name
+            </Text>
             <TextInput
-              style={styles.textInput}
+              style={[
+                styles.textInput,
+                {
+                  backgroundColor: currentTheme.colorBackground,
+                  borderColor: currentTheme.colorBorder || "#e0e0e0",
+                  color: currentTheme.colorText,
+                },
+              ]}
+              placeholderTextColor={currentTheme.colorTextSecondary}
               value={customName}
               onChangeText={setCustomName}
               placeholder="Give your plant a name"
             />
           </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Location (Optional)</Text>
+          <View
+            style={[
+              styles.inputContainer,
+              { backgroundColor: currentTheme.colorSurface },
+            ]}
+          >
+            <Text
+              style={[styles.inputLabel, { color: currentTheme.colorText }]}
+            >
+              Location (Optional)
+            </Text>
             <TextInput
-              style={styles.textInput}
+              style={[
+                styles.textInput,
+                {
+                  backgroundColor: currentTheme.colorBackground,
+                  borderColor: currentTheme.colorBorder || "#e0e0e0",
+                  color: currentTheme.colorText,
+                },
+              ]}
+              placeholderTextColor={currentTheme.colorTextSecondary}
               value={location}
               onChangeText={setLocation}
               placeholder="e.g., Living room, Bedroom window"
             />
           </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Notes (Optional)</Text>
+          <View
+            style={[
+              styles.inputContainer,
+              { backgroundColor: currentTheme.colorSurface },
+            ]}
+          >
+            <Text
+              style={[styles.inputLabel, { color: currentTheme.colorText }]}
+            >
+              Notes (Optional)
+            </Text>
             <TextInput
-              style={[styles.textInput, styles.notesInput]}
+              style={[
+                styles.textInput,
+                styles.notesInput,
+                {
+                  backgroundColor: currentTheme.colorBackground,
+                  borderColor: currentTheme.colorBorder || "#e0e0e0",
+                  color: currentTheme.colorText,
+                },
+              ]}
+              placeholderTextColor={currentTheme.colorTextSecondary}
               value={notes}
               onChangeText={setNotes}
               placeholder="Any special notes about your plant..."
@@ -560,10 +855,24 @@ const PlantDetailsReview: React.FC = () => {
 
         {/* Care Instructions Section */}
         {editableCareDetails && !isFetchingCareDetails && (
-          <View style={styles.careDetailsSection}>
+          <View
+            style={[
+              styles.careDetailsSection,
+              { backgroundColor: currentTheme.colorBackground },
+            ]}
+          >
             <View style={styles.careDetailsHeader}>
-              <Text style={styles.sectionTitle}>Care Instructions</Text>
-              <Text style={styles.careDetailsSubtitle}>
+              <Text
+                style={[styles.sectionTitle, { color: currentTheme.colorText }]}
+              >
+                Care Instructions
+              </Text>
+              <Text
+                style={[
+                  styles.careDetailsSubtitle,
+                  { color: currentTheme.colorTextSecondary },
+                ]}
+              >
                 Customize these recommendations for your environment
               </Text>
             </View>
@@ -571,22 +880,37 @@ const PlantDetailsReview: React.FC = () => {
             <EditableCareDetails
               careDetails={editableCareDetails}
               onUpdate={handleCareDetailUpdate}
+              currentTheme={currentTheme}
             />
 
             {/* Plant Care Tips */}
-            <View style={styles.tipsContainer}>
+            <View
+              style={[
+                styles.tipsContainer,
+                { backgroundColor: currentTheme.colorSurface },
+              ]}
+            >
               <View style={styles.tipsHeader}>
                 <FontAwesome6
                   name="lightbulb"
                   size={18}
-                  color={theme.colorLeafyGreen}
+                  color={currentTheme.colorLeafyGreen}
                 />
-                <Text style={styles.tipsTitle}>Pro Tips</Text>
+                <Text
+                  style={[styles.tipsTitle, { color: currentTheme.colorText }]}
+                >
+                  Pro Tips
+                </Text>
               </View>
 
               <View style={styles.tipItem}>
                 <FontAwesome6 name="droplet" size={14} color="#3498db" />
-                <Text style={styles.tipText}>
+                <Text
+                  style={[
+                    styles.tipText,
+                    { color: currentTheme.colorTextSecondary },
+                  ]}
+                >
                   Check soil moisture by inserting your finger 1-2 inches deep
                   before watering
                 </Text>
@@ -594,7 +918,12 @@ const PlantDetailsReview: React.FC = () => {
 
               <View style={styles.tipItem}>
                 <FontAwesome6 name="sun" size={14} color="#f39c12" />
-                <Text style={styles.tipText}>
+                <Text
+                  style={[
+                    styles.tipText,
+                    { color: currentTheme.colorTextSecondary },
+                  ]}
+                >
                   Rotate your plant weekly to ensure even growth toward the
                   light
                 </Text>
@@ -602,7 +931,12 @@ const PlantDetailsReview: React.FC = () => {
 
               <View style={styles.tipItem}>
                 <FontAwesome6 name="eye" size={14} color="#e74c3c" />
-                <Text style={styles.tipText}>
+                <Text
+                  style={[
+                    styles.tipText,
+                    { color: currentTheme.colorTextSecondary },
+                  ]}
+                >
                   Watch for yellowing leaves (overwatering) or brown crispy tips
                   (underwatering)
                 </Text>
@@ -610,23 +944,40 @@ const PlantDetailsReview: React.FC = () => {
             </View>
 
             {/* Plant Family Information */}
-            <View style={styles.familyInfoContainer}>
+            <View
+              style={[
+                styles.familyInfoContainer,
+                { backgroundColor: currentTheme.colorSurface },
+              ]}
+            >
               <View style={styles.familyInfoHeader}>
                 <FontAwesome6
                   name="dna"
                   size={18}
-                  color={theme.colorLeafyGreen}
+                  color={currentTheme.colorLeafyGreen}
                 />
-                <Text style={styles.familyInfoTitle}>
+                <Text
+                  style={[
+                    styles.familyInfoTitle,
+                    { color: currentTheme.colorText },
+                  ]}
+                >
                   Plant Family Insights
                 </Text>
               </View>
 
-              <Text style={styles.familyName}>
+              <Text
+                style={[styles.familyName, { color: currentTheme.colorText }]}
+              >
                 {selectedPlant.species.family.scientificNameWithoutAuthor}
               </Text>
 
-              <Text style={styles.familyDescription}>
+              <Text
+                style={[
+                  styles.familyDescription,
+                  { color: currentTheme.colorTextSecondary },
+                ]}
+              >
                 Plants in this family typically share similar care requirements
                 and growth patterns. The care recommendations above are tailored
                 based on this plant family's characteristics.
@@ -637,13 +988,37 @@ const PlantDetailsReview: React.FC = () => {
 
         {/* Quick Reference Card */}
         {editableCareDetails && !isFetchingCareDetails && (
-          <View style={styles.quickReferenceContainer}>
-            <Text style={styles.quickReferenceTitle}>Quick Reference</Text>
+          <View
+            style={[
+              styles.quickReferenceContainer,
+              { backgroundColor: currentTheme.colorSurface },
+            ]}
+          >
+            <Text
+              style={[
+                styles.quickReferenceTitle,
+                { color: currentTheme.colorText },
+              ]}
+            >
+              Quick Reference
+            </Text>
             <View style={styles.quickReferenceGrid}>
               <View style={styles.quickReferenceItem}>
                 <FontAwesome6 name="droplet" size={16} color="#3498db" />
-                <Text style={styles.quickReferenceLabel}>Water</Text>
-                <Text style={styles.quickReferenceValue}>
+                <Text
+                  style={[
+                    styles.quickReferenceLabel,
+                    { color: currentTheme.colorTextSecondary },
+                  ]}
+                >
+                  Water
+                </Text>
+                <Text
+                  style={[
+                    styles.quickReferenceValue,
+                    { color: currentTheme.colorText },
+                  ]}
+                >
                   {editableCareDetails.wateringFrequency
                     ?.split(" ")
                     .slice(0, 2)
@@ -653,8 +1028,20 @@ const PlantDetailsReview: React.FC = () => {
 
               <View style={styles.quickReferenceItem}>
                 <FontAwesome6 name="sun" size={16} color="#f39c12" />
-                <Text style={styles.quickReferenceLabel}>Light</Text>
-                <Text style={styles.quickReferenceValue}>
+                <Text
+                  style={[
+                    styles.quickReferenceLabel,
+                    { color: currentTheme.colorTextSecondary },
+                  ]}
+                >
+                  Light
+                </Text>
+                <Text
+                  style={[
+                    styles.quickReferenceValue,
+                    { color: currentTheme.colorText },
+                  ]}
+                >
                   {editableCareDetails.sunlightRequirement?.split(",")[0] ||
                     "Bright indirect"}
                 </Text>
@@ -666,16 +1053,40 @@ const PlantDetailsReview: React.FC = () => {
                   size={16}
                   color="#e74c3c"
                 />
-                <Text style={styles.quickReferenceLabel}>Temp</Text>
-                <Text style={styles.quickReferenceValue}>
+                <Text
+                  style={[
+                    styles.quickReferenceLabel,
+                    { color: currentTheme.colorTextSecondary },
+                  ]}
+                >
+                  Temp
+                </Text>
+                <Text
+                  style={[
+                    styles.quickReferenceValue,
+                    { color: currentTheme.colorText },
+                  ]}
+                >
                   {editableCareDetails.temperature?.split(" ")[0] || "18-24°C"}
                 </Text>
               </View>
 
               <View style={styles.quickReferenceItem}>
                 <FontAwesome6 name="cloud-rain" size={16} color="#9b59b6" />
-                <Text style={styles.quickReferenceLabel}>Humidity</Text>
-                <Text style={styles.quickReferenceValue}>
+                <Text
+                  style={[
+                    styles.quickReferenceLabel,
+                    { color: currentTheme.colorTextSecondary },
+                  ]}
+                >
+                  Humidity
+                </Text>
+                <Text
+                  style={[
+                    styles.quickReferenceValue,
+                    { color: currentTheme.colorText },
+                  ]}
+                >
                   {editableCareDetails.humidity?.split(" ")[0] || "40-60%"}
                 </Text>
               </View>
@@ -692,7 +1103,7 @@ const PlantDetailsReview: React.FC = () => {
         ]}
       >
         <LinearGradient
-          colors={[theme.colorLeafyGreen, theme.colorLeafyGreen]}
+          colors={[currentTheme.colorLeafyGreen, currentTheme.colorLeafyGreen]}
           style={styles.saveButton}
         >
           <TouchableOpacity
@@ -706,7 +1117,9 @@ const PlantDetailsReview: React.FC = () => {
               color="white"
               style={{ marginRight: 8 }}
             />
-            <Text style={styles.saveButtonText}>Add to My Plants</Text>
+            <Text style={[styles.saveButtonText, { color: "white" }]}>
+              Add to My Plants
+            </Text>
           </TouchableOpacity>
         </LinearGradient>
       </View>
@@ -717,7 +1130,6 @@ const PlantDetailsReview: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colorWhite,
   },
   headerGradient: {
     paddingBottom: 4,
@@ -751,7 +1163,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   backButton: {
-    backgroundColor: theme.colorLeafyGreen,
+    backgroundColor: "#4CAF50", // Using fallback green color for styles
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,
@@ -764,7 +1176,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: "800",
-    color: theme.colorLeafyGreen,
+    color: "#4CAF50", // Using fallback green color for styles
     letterSpacing: 0.5,
   },
   imageContainer: {
@@ -775,7 +1187,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 10,
     borderRadius: 20,
-    shadowColor: theme.colorLeafyGreen,
+    shadowColor: "#4CAF50", // Using fallback green color for styles
     shadowOffset: {
       width: 0,
       height: 4,
@@ -805,8 +1217,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderRadius: 12,
     borderLeftWidth: 4,
-    borderLeftColor: theme.colorLeafyGreen,
-    shadowColor: theme.colorLeafyGreen,
+    borderLeftColor: "#4CAF50", // Using fallback green color for styles
+    shadowColor: "#4CAF50", // Using fallback green color for styles
     shadowOffset: {
       width: 0,
       height: 2,
@@ -817,7 +1229,7 @@ const styles = StyleSheet.create({
   },
   careSourceText: {
     fontSize: 14,
-    color: theme.colorLeafyGreen,
+    color: "#4CAF50", // Using fallback green color for styles
     fontWeight: "500",
   },
   loadingCareContainer: {
@@ -1066,7 +1478,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   sliderThumb: {
-    backgroundColor: theme.colorLeafyGreen,
+    backgroundColor: "#4CAF50", // Using fallback green color for styles
     width: 20,
     height: 20,
   },

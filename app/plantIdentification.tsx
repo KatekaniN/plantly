@@ -9,6 +9,7 @@ import {
   StyleSheet,
   SafeAreaView,
   Dimensions,
+  StatusBar,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
@@ -17,12 +18,16 @@ import {
   generateDefaultCareDetails,
 } from "../store/plantIdentification";
 import { theme } from "@/theme";
+import { useTheme } from "@/contexts/ThemeContext";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
 const PlantIdentificationScreen: React.FC = () => {
   const params = useLocalSearchParams();
   const router = useRouter();
+  const { theme: currentTheme, isDark } = useTheme();
+  const insets = useSafeAreaInsets();
 
   const imageUri = Array.isArray(params.imageUri)
     ? params.imageUri[0]
@@ -92,23 +97,67 @@ const PlantIdentificationScreen: React.FC = () => {
 
   if (error) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.imageContainer}>
+      <SafeAreaView
+        style={[
+          styles.container,
+          {
+            backgroundColor: currentTheme.colorBackground,
+            paddingTop: insets.top,
+          },
+        ]}
+      >
+        <StatusBar
+          barStyle={isDark ? "light-content" : "dark-content"}
+          backgroundColor={currentTheme.colorBackground}
+        />
+
+        <View
+          style={[
+            styles.imageContainer,
+            { backgroundColor: currentTheme.colorSurface },
+          ]}
+        >
           <Image source={{ uri: finalImageUri }} style={styles.capturedImage} />
         </View>
 
-        <View style={styles.contentContainer}>
-          <View style={styles.errorContainer}>
-            <Text style={styles.errorTitle}>Identification Failed</Text>
-            <Text style={styles.errorText}>{error}</Text>
+        <View
+          style={[
+            styles.contentContainer,
+            { backgroundColor: currentTheme.colorBackground },
+          ]}
+        >
+          <View
+            style={[
+              styles.errorContainer,
+              { backgroundColor: currentTheme.colorSurface },
+            ]}
+          >
+            <Text
+              style={[styles.errorTitle, { color: currentTheme.colorError }]}
+            >
+              Identification Failed
+            </Text>
+            <Text style={[styles.errorText, { color: currentTheme.colorText }]}>
+              {error}
+            </Text>
           </View>
 
-          <View style={styles.buttonContainer}>
+          <View style={styles.fullWidthButtonContainer}>
             <TouchableOpacity
-              style={styles.retryButton}
+              style={[
+                styles.retryButton,
+                { backgroundColor: currentTheme.colorLeafyGreen },
+              ]}
               onPress={handleRetakePhoto}
             >
-              <Text style={styles.buttonText}>Take Another Photo</Text>
+              <Text
+                style={[
+                  styles.buttonText,
+                  { color: currentTheme.colorTextInverse },
+                ]}
+              >
+                Take Another Photo
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -117,20 +166,60 @@ const PlantIdentificationScreen: React.FC = () => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        {
+          backgroundColor: currentTheme.colorBackground,
+          paddingTop: insets.top,
+        },
+      ]}
+    >
+      <StatusBar
+        barStyle={isDark ? "light-content" : "dark-content"}
+        backgroundColor={currentTheme.colorBackground}
+      />
+
       {/* Header with captured image */}
-      <View style={styles.imageContainer}>
+      <View
+        style={[
+          styles.imageContainer,
+          { backgroundColor: currentTheme.colorSurface },
+        ]}
+      >
         <Image source={{ uri: finalImageUri }} style={styles.capturedImage} />
       </View>
 
       {/* Content Container with proper spacing */}
-      <View style={styles.contentContainer}>
+      <View
+        style={[
+          styles.contentContainer,
+          { backgroundColor: currentTheme.colorBackground },
+        ]}
+      >
         {/* Loading State */}
         {isLoading && (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={theme.colorLeafyGreen} />
-            <Text style={styles.loadingText}>Identifying your plant...</Text>
-            <Text style={styles.loadingSubtext}>
+          <View
+            style={[
+              styles.loadingContainer,
+              { backgroundColor: currentTheme.colorBackground },
+            ]}
+          >
+            <ActivityIndicator
+              size="large"
+              color={currentTheme.colorLeafyGreen}
+            />
+            <Text
+              style={[styles.loadingText, { color: currentTheme.colorText }]}
+            >
+              Identifying your plant...
+            </Text>
+            <Text
+              style={[
+                styles.loadingSubtext,
+                { color: currentTheme.colorTextSecondary },
+              ]}
+            >
               This may take a few seconds
             </Text>
           </View>
@@ -140,13 +229,23 @@ const PlantIdentificationScreen: React.FC = () => {
         {!isLoading && identificationResults.length > 0 && (
           <>
             {/* Scrollable Results */}
-            <View style={styles.resultsScrollContainer}>
-              <Text style={styles.resultsTitle}>
+            <View
+              style={[
+                styles.resultsScrollContainer,
+                { backgroundColor: currentTheme.colorBackground },
+              ]}
+            >
+              <Text
+                style={[styles.resultsTitle, { color: currentTheme.colorText }]}
+              >
                 Plant Identification Results
               </Text>
 
               <ScrollView
-                style={styles.resultsScroll}
+                style={[
+                  styles.resultsScroll,
+                  { backgroundColor: currentTheme.colorBackground },
+                ]}
                 contentContainerStyle={styles.resultsContent}
                 showsVerticalScrollIndicator={false}
               >
@@ -157,22 +256,61 @@ const PlantIdentificationScreen: React.FC = () => {
                       key={`${result.species.scientificNameWithoutAuthor}_${index}`}
                       style={[
                         styles.resultCard,
+                        { backgroundColor: currentTheme.colorSurface },
                         selectedPlant?.species.scientificNameWithoutAuthor ===
-                          result.species.scientificNameWithoutAuthor &&
+                          result.species.scientificNameWithoutAuthor && [
                           styles.selectedResultCard,
+                          { backgroundColor: currentTheme.colorLeafyGreen },
+                        ],
                       ]}
                       onPress={() => handleSelectPlant(result)}
                       activeOpacity={0.7}
                     >
                       <View style={styles.resultHeader}>
-                        <Text style={styles.plantName}>
+                        <Text
+                          style={[
+                            styles.plantName,
+                            {
+                              color:
+                                selectedPlant?.species
+                                  .scientificNameWithoutAuthor ===
+                                result.species.scientificNameWithoutAuthor
+                                  ? currentTheme.colorTextInverse
+                                  : currentTheme.colorText,
+                            },
+                          ]}
+                        >
                           {truncateText(
                             result.species.scientificNameWithoutAuthor,
                             25
                           )}
                         </Text>
-                        <View style={styles.confidenceContainer}>
-                          <Text style={styles.confidenceScore}>
+                        <View
+                          style={[
+                            styles.confidenceContainer,
+                            {
+                              backgroundColor:
+                                selectedPlant?.species
+                                  .scientificNameWithoutAuthor ===
+                                result.species.scientificNameWithoutAuthor
+                                  ? currentTheme.colorTextInverse
+                                  : currentTheme.colorLeafyGreen,
+                            },
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              styles.confidenceScore,
+                              {
+                                color:
+                                  selectedPlant?.species
+                                    .scientificNameWithoutAuthor ===
+                                  result.species.scientificNameWithoutAuthor
+                                    ? currentTheme.colorLeafyGreen
+                                    : currentTheme.colorTextInverse,
+                              },
+                            ]}
+                          >
                             {formatConfidenceScore(result.score)} match
                           </Text>
                         </View>
@@ -180,19 +318,55 @@ const PlantIdentificationScreen: React.FC = () => {
 
                       {result.species.commonNames &&
                         result.species.commonNames.length > 0 && (
-                          <Text style={styles.commonName}>
+                          <Text
+                            style={[
+                              styles.commonName,
+                              {
+                                color:
+                                  selectedPlant?.species
+                                    .scientificNameWithoutAuthor ===
+                                  result.species.scientificNameWithoutAuthor
+                                    ? currentTheme.colorTextInverse
+                                    : currentTheme.colorTextSecondary,
+                              },
+                            ]}
+                          >
                             Common name:{" "}
                             {truncateText(result.species.commonNames[0], 30)}
                           </Text>
                         )}
 
-                      <Text style={styles.familyName}>
+                      <Text
+                        style={[
+                          styles.familyName,
+                          {
+                            color:
+                              selectedPlant?.species
+                                .scientificNameWithoutAuthor ===
+                              result.species.scientificNameWithoutAuthor
+                                ? currentTheme.colorTextInverse
+                                : currentTheme.colorTextSecondary,
+                          },
+                        ]}
+                      >
                         Family:{" "}
                         {result.species.family.scientificNameWithoutAuthor}
                       </Text>
 
                       {result.species.genus && (
-                        <Text style={styles.genusName}>
+                        <Text
+                          style={[
+                            styles.genusName,
+                            {
+                              color:
+                                selectedPlant?.species
+                                  .scientificNameWithoutAuthor ===
+                                result.species.scientificNameWithoutAuthor
+                                  ? currentTheme.colorTextInverse
+                                  : currentTheme.colorTextSecondary,
+                            },
+                          ]}
+                        >
                           Genus:{" "}
                           {result.species.genus.scientificNameWithoutAuthor}
                         </Text>
@@ -203,13 +377,29 @@ const PlantIdentificationScreen: React.FC = () => {
             </View>
 
             {/* Fixed Action Buttons */}
-            <View style={styles.buttonContainer}>
+            <View
+              style={[
+                styles.buttonContainer,
+                { backgroundColor: currentTheme.colorBackground },
+              ]}
+            >
               <TouchableOpacity
-                style={styles.secondaryButton}
+                style={[
+                  styles.secondaryButton,
+                  {
+                    backgroundColor: currentTheme.colorSurface,
+                    borderColor: currentTheme.colorBorder || "#e0e0e0",
+                  },
+                ]}
                 onPress={handleRetakePhoto}
                 activeOpacity={0.7}
               >
-                <Text style={styles.secondaryButtonText}>
+                <Text
+                  style={[
+                    styles.secondaryButtonText,
+                    { color: currentTheme.colorText },
+                  ]}
+                >
                   Take Another Photo
                 </Text>
               </TouchableOpacity>
@@ -217,7 +407,11 @@ const PlantIdentificationScreen: React.FC = () => {
               <TouchableOpacity
                 style={[
                   styles.primaryButton,
-                  !selectedPlant && styles.disabledButton,
+                  { backgroundColor: currentTheme.colorLeafyGreen },
+                  !selectedPlant && [
+                    styles.disabledButton,
+                    { backgroundColor: currentTheme.colorSurface },
+                  ],
                 ]}
                 onPress={handleContinue}
                 disabled={!selectedPlant}
@@ -226,7 +420,11 @@ const PlantIdentificationScreen: React.FC = () => {
                 <Text
                   style={[
                     styles.primaryButtonText,
-                    !selectedPlant && styles.disabledButtonText,
+                    { color: currentTheme.colorTextInverse },
+                    !selectedPlant && [
+                      styles.disabledButtonText,
+                      { color: currentTheme.colorTextSecondary },
+                    ],
                   ]}
                 >
                   This looks correct {selectedPlant ? "" : "❌"}
@@ -239,20 +437,47 @@ const PlantIdentificationScreen: React.FC = () => {
         {/* No Results */}
         {!isLoading && identificationResults.length === 0 && !error && (
           <>
-            <View style={styles.noResultsContainer}>
-              <Text style={styles.noResultsTitle}>No matches found</Text>
-              <Text style={styles.noResultsText}>
+            <View
+              style={[
+                styles.noResultsContainer,
+                { backgroundColor: currentTheme.colorSurface },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.noResultsTitle,
+                  { color: currentTheme.colorText },
+                ]}
+              >
+                No matches found
+              </Text>
+              <Text
+                style={[
+                  styles.noResultsText,
+                  { color: currentTheme.colorTextSecondary },
+                ]}
+              >
                 Try taking a clearer photo with better lighting, or focus on the
                 leaves and flowers.
               </Text>
             </View>
 
-            <View style={styles.buttonContainer}>
+            <View style={styles.fullWidthButtonContainer}>
               <TouchableOpacity
-                style={styles.retryButton}
+                style={[
+                  styles.retryButton,
+                  { backgroundColor: currentTheme.colorLeafyGreen },
+                ]}
                 onPress={handleRetakePhoto}
               >
-                <Text style={styles.buttonText}>Take Another Photo</Text>
+                <Text
+                  style={[
+                    styles.buttonText,
+                    { color: currentTheme.colorTextInverse },
+                  ]}
+                >
+                  Take Another Photo
+                </Text>
               </TouchableOpacity>
             </View>
           </>
@@ -390,6 +615,13 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: "#f0f0f0",
   },
+  fullWidthButtonContainer: {
+    paddingTop: 8,
+    paddingBottom: 8,
+    backgroundColor: "#ffffff",
+    borderTopWidth: 1,
+    borderTopColor: "#f0f0f0",
+  },
   primaryButton: {
     flex: 1,
     backgroundColor: theme.colorLeafyGreen,
@@ -483,6 +715,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4.65,
     elevation: 8,
+    alignItems: "center",
+    width: "100%",
   },
   buttonText: {
     color: "#ffffff",

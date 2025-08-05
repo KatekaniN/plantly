@@ -66,6 +66,15 @@ export interface PlantProfile {
   location?: string;
 }
 
+export interface UserNotificationPreferences {
+  reminderTime: { hour: number; minute: number }; // When to send day-of reminders
+  dayBeforeTime: { hour: number; minute: number }; // When to send day-before reminders
+  overdueTime: { hour: number; minute: number }; // When to send overdue reminders
+  enableNotifications: boolean;
+  enableDayBeforeReminders: boolean;
+  enableOverdueReminders: boolean;
+}
+
 export interface PlantNetApiResponse {
   query: {
     project: string;
@@ -93,12 +102,17 @@ type PlantIdentificationStore = {
   error: string | null;
   myPlants: PlantProfile[];
   isFetchingCareDetails: boolean;
+  notificationPreferences: UserNotificationPreferences;
   deletePlantFromCollection: (plantId: string) => void;
   waterPlant: (plantId: string) => void;
+  updatePlant: (plantId: string, updates: Partial<PlantProfile>) => void;
   updatePlantWateringSchedule: (
     plantId: string,
     lastWatered: string,
     nextWateringDate: string
+  ) => void;
+  updateNotificationPreferences: (
+    preferences: Partial<UserNotificationPreferences>
   ) => void;
   careDataSource: "default" | null;
   setCurrentImage: (uri: string) => void;
@@ -112,6 +126,7 @@ type PlantIdentificationStore = {
   clearCurrentIdentification: () => void;
   setError: (error: string | null) => void;
   setLoading: (loading: boolean) => void;
+  clearAllData: () => void;
 };
 
 const PLANTNET_API_KEY = "2b10AiFkzcaToQc4itaO6wd4O";
@@ -587,6 +602,14 @@ export const usePlantIdentificationStore = create(
       myPlants: [] as PlantProfile[],
       isFetchingCareDetails: false,
       careDataSource: null as "default" | null,
+      notificationPreferences: {
+        reminderTime: { hour: 9, minute: 0 }, // Default: 9:00 AM for day-of reminders
+        dayBeforeTime: { hour: 20, minute: 0 }, // Default: 8:00 PM for day-before reminders
+        overdueTime: { hour: 18, minute: 0 }, // Default: 6:00 PM for overdue reminders
+        enableNotifications: true,
+        enableDayBeforeReminders: true,
+        enableOverdueReminders: true,
+      } as UserNotificationPreferences,
 
       setCurrentImage: (uri: string): void => {
         set({ currentImageUri: uri });
@@ -683,11 +706,13 @@ export const usePlantIdentificationStore = create(
 
         // Schedule initial watering notifications
         if (nextWateringDate) {
+          const { notificationPreferences } = get();
           notificationService
             .scheduleComprehensiveWateringReminders(
               newPlant.id,
               newPlant.name,
-              new Date(nextWateringDate)
+              new Date(nextWateringDate),
+              notificationPreferences
             )
             .then((scheduledIds) => {
               console.log(
@@ -761,6 +786,7 @@ export const usePlantIdentificationStore = create(
 
               // Schedule new watering notifications
               if (nextWateringDate) {
+                const { notificationPreferences } = get();
                 notificationService
                   .cancelPlantNotifications(plantId)
                   .then(() => {
@@ -768,7 +794,8 @@ export const usePlantIdentificationStore = create(
                       .scheduleComprehensiveWateringReminders(
                         plantId,
                         plant.name,
-                        new Date(nextWateringDate)
+                        new Date(nextWateringDate),
+                        notificationPreferences
                       )
                       .then((scheduledIds) => {
                         console.log(
@@ -789,6 +816,84 @@ export const usePlantIdentificationStore = create(
                 lastWatered: today,
                 nextWateringDate: nextWateringDate,
               };
+            }
+            return plant;
+          });
+
+          return {
+            myPlants: updatedPlants,
+          };
+        });
+      },
+
+      updatePlant: (plantId: string, updates: Partial<PlantProfile>): void => {
+        set((state: any) => {
+          const updatedPlants = state.myPlants.map((plant: PlantProfile) => {
+            if (plant.id === plantId) {
+              const updatedPlant = {
+                ...plant,
+                ...updates,
+              };
+
+              // Check if watering frequency was changed
+              const wateringFrequencyChanged =
+                updates.careDetails?.wateringFrequency &&
+                updates.careDetails.wateringFrequency !==
+                  plant.careDetails.wateringFrequency;
+
+              // If watering frequency changed, recalculate next watering date and update notifications
+              if (wateringFrequencyChanged) {
+                const lastWateredDate =
+                  plant.lastWatered || new Date().toISOString();
+                const newNextWateringDate = calculateNextWateringDate(
+                  updatedPlant.careDetails.wateringFrequency,
+                  lastWateredDate
+                );
+
+                updatedPlant.nextWateringDate = newNextWateringDate;
+
+                console.log(
+                  `📅 Watering frequency changed for ${plant.name}: ${plant.careDetails.wateringFrequency} → ${updatedPlant.careDetails.wateringFrequency}`
+                );
+                console.log(
+                  `🗓️ New next watering date: ${newNextWateringDate}`
+                );
+
+                // Cancel old notifications and schedule new ones
+                if (newNextWateringDate) {
+                  const { notificationPreferences } = get();
+                  notificationService
+                    .cancelPlantNotifications(plantId)
+                    .then(() => {
+                      notificationService
+                        .scheduleComprehensiveWateringReminders(
+                          plantId,
+                          updatedPlant.name,
+                          new Date(newNextWateringDate),
+                          notificationPreferences
+                        )
+                        .then((scheduledIds) => {
+                          console.log(
+                            `📱 Rescheduled ${scheduledIds.length} reminders for ${updatedPlant.name} with new frequency`
+                          );
+                        })
+                        .catch((error) => {
+                          console.error(
+                            "Error rescheduling reminders after frequency change:",
+                            error
+                          );
+                        });
+                    })
+                    .catch((error) => {
+                      console.error(
+                        "Error cancelling old notifications during frequency change:",
+                        error
+                      );
+                    });
+                }
+              }
+
+              return updatedPlant;
             }
             return plant;
           });
@@ -822,6 +927,55 @@ export const usePlantIdentificationStore = create(
         });
       },
 
+      updateNotificationPreferences: (
+        preferences: Partial<UserNotificationPreferences>
+      ): void => {
+        set((state: any) => ({
+          notificationPreferences: {
+            ...state.notificationPreferences,
+            ...preferences,
+          },
+        }));
+
+        console.log("🔔 Notification preferences updated:", preferences);
+
+        // Reschedule all plant notifications with new times
+        const { myPlants } = get();
+        myPlants.forEach((plant) => {
+          if (plant.nextWateringDate) {
+            notificationService
+              .cancelPlantNotifications(plant.id)
+              .then(() => {
+                const updatedPrefs = {
+                  ...get().notificationPreferences,
+                  ...preferences,
+                };
+                notificationService
+                  .scheduleComprehensiveWateringReminders(
+                    plant.id,
+                    plant.name,
+                    new Date(plant.nextWateringDate!),
+                    updatedPrefs
+                  )
+                  .then((scheduledIds) => {
+                    console.log(
+                      `📱 Rescheduled ${scheduledIds.length} reminders for ${plant.name} with new times`
+                    );
+                  })
+                  .catch((error) => {
+                    console.error("Error rescheduling with new times:", error);
+                  });
+              })
+              .catch((error) => {
+                console.error(
+                  "Error cancelling notifications for time update:",
+                  error
+                );
+              });
+          }
+        });
+      },
+
       clearCurrentIdentification: (): void => {
         set({
           currentImageUri: null,
@@ -842,12 +996,56 @@ export const usePlantIdentificationStore = create(
       setLoading: (loading: boolean): void => {
         set({ isLoading: loading });
       },
+
+      clearAllData: (): void => {
+        set((state: any) => {
+          // Cancel all notifications for all plants
+          state.myPlants.forEach((plant: PlantProfile) => {
+            notificationService
+              .cancelPlantNotifications(plant.id)
+              .then(() => {
+                console.log(
+                  `🗑️ Cancelled all notifications for plant: ${plant.name}`
+                );
+              })
+              .catch((error) => {
+                console.error(
+                  "Error cancelling notifications for plant:",
+                  error
+                );
+              });
+          });
+
+          console.log("🗑️ Clearing all plant data and resetting store");
+
+          return {
+            currentImageUri: null,
+            identificationResults: [],
+            selectedPlant: null,
+            careDetails: null,
+            error: null,
+            isLoading: false,
+            isFetchingCareDetails: false,
+            careDataSource: null,
+            myPlants: [],
+            notificationPreferences: {
+              reminderTime: { hour: 9, minute: 0 },
+              dayBeforeTime: { hour: 18, minute: 0 },
+              overdueTime: { hour: 10, minute: 0 },
+              enableNotifications: true,
+              enableDayBeforeReminders: true,
+              enableOverdueReminders: true,
+            },
+          };
+        });
+      },
     }),
     {
       name: "plantly-identification-store",
       storage: createJSONStorage(() => AsyncStorage),
       partialize: (state: PlantIdentificationStore) => ({
         myPlants: state.myPlants,
+        notificationPreferences: state.notificationPreferences,
       }),
     }
   )
