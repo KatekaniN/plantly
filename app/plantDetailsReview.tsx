@@ -1003,7 +1003,15 @@ const PlantDetailsReview: React.FC = () => {
               Quick Reference
             </Text>
             <View style={styles.quickReferenceGrid}>
-              <View style={styles.quickReferenceItem}>
+              <View
+                style={[
+                  styles.quickReferenceItem,
+                  {
+                    backgroundColor: currentTheme.colorBackground,
+                    borderColor: currentTheme.colorBorder || "rgba(0,0,0,0.05)",
+                  },
+                ]}
+              >
                 <FontAwesome6 name="droplet" size={16} color="#3498db" />
                 <Text
                   style={[
@@ -1026,7 +1034,15 @@ const PlantDetailsReview: React.FC = () => {
                 </Text>
               </View>
 
-              <View style={styles.quickReferenceItem}>
+              <View
+                style={[
+                  styles.quickReferenceItem,
+                  {
+                    backgroundColor: currentTheme.colorBackground,
+                    borderColor: currentTheme.colorBorder || "rgba(0,0,0,0.05)",
+                  },
+                ]}
+              >
                 <FontAwesome6 name="sun" size={16} color="#f39c12" />
                 <Text
                   style={[
@@ -1047,7 +1063,15 @@ const PlantDetailsReview: React.FC = () => {
                 </Text>
               </View>
 
-              <View style={styles.quickReferenceItem}>
+              <View
+                style={[
+                  styles.quickReferenceItem,
+                  {
+                    backgroundColor: currentTheme.colorBackground,
+                    borderColor: currentTheme.colorBorder || "rgba(0,0,0,0.05)",
+                  },
+                ]}
+              >
                 <FontAwesome6
                   name="temperature-three-quarters"
                   size={16}
@@ -1071,7 +1095,15 @@ const PlantDetailsReview: React.FC = () => {
                 </Text>
               </View>
 
-              <View style={styles.quickReferenceItem}>
+              <View
+                style={[
+                  styles.quickReferenceItem,
+                  {
+                    backgroundColor: currentTheme.colorBackground,
+                    borderColor: currentTheme.colorBorder || "rgba(0,0,0,0.05)",
+                  },
+                ]}
+              >
                 <FontAwesome6 name="cloud-rain" size={16} color="#9b59b6" />
                 <Text
                   style={[
@@ -1098,7 +1130,7 @@ const PlantDetailsReview: React.FC = () => {
       {/* Fixed Bottom Button with Safe Area */}
       <View
         style={[
-          styles.bottomButtonContainer,
+          { backgroundColor: currentTheme.colorLeafyGreen },
           { paddingBottom: insets.bottom + 16 },
         ]}
       >
@@ -1614,7 +1646,6 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   quickReferenceContainer: {
-    backgroundColor: "#ffffff",
     marginHorizontal: 16,
     marginTop: 16,
     marginBottom: 20,
@@ -1629,7 +1660,6 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 2,
     borderWidth: 1,
-    borderColor: "#f0f8f0",
   },
   quickReferenceTitle: {
     fontSize: 18,
@@ -1645,22 +1675,20 @@ const styles = StyleSheet.create({
   quickReferenceItem: {
     width: "48%",
     alignItems: "center",
-    backgroundColor: "#f8f9fa",
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
+    borderWidth: 1,
   },
   quickReferenceLabel: {
     fontSize: 12,
     fontWeight: "600",
-    color: "#666",
     marginTop: 8,
     marginBottom: 4,
   },
   quickReferenceValue: {
     fontSize: 14,
     fontWeight: "600",
-    color: theme.colorDarkGreen,
     textAlign: "center",
   },
 });

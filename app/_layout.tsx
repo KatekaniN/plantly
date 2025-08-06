@@ -105,6 +105,15 @@ function StackNavigator() {
             presentation: "modal",
           }}
         />
+        <Stack.Screen
+          name="plant-care-guide"
+          options={{
+            animation: "slide_from_right",
+            headerShown: false,
+            title: "Plant Care Guide",
+            presentation: "modal",
+          }}
+        />
       </Stack>
     </View>
   );

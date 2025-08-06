@@ -240,31 +240,24 @@ export default function NewScreen() {
           style={[
             styles.uploadContainer,
             {
-              width: imageSize * 5,
-              height: imageSize * 5,
-              backgroundColor: isDark ? '#2a2a2a' : '#f8f9fa',
-              borderColor: isDark ? '#404040' : '#e0e0e0',
+              backgroundColor: isDark ? "#2a2a2a" : "#f8f9fa",
+              borderColor: isDark ? "#404040" : "#e0e0e0",
               borderWidth: 2,
-              borderStyle: 'dashed',
+              borderStyle: "dashed",
             },
           ]}
           onPress={pickImageFromGallery}
         >
-          <Image
-            source={require("@/assets/images/upload-image.png")}
-            style={[
-              styles.uploadImage,
-              { 
-                width: imageSize * 2.5, 
-                height: imageSize * 2,
-                tintColor: currentTheme.colorTextSecondary,
-              },
-            ]}
-            resizeMode="contain"
-          />
-          <Text style={[styles.uploadText, { color: currentTheme.colorText }]}>
-            Upload
-          </Text>
+          <View style={styles.uploadContent}>
+            <View style={styles.uploadIcons}>
+              <Image 
+                source={require("@/assets/images/upload-image.png")}
+                style={{ width: imageSize * 3.1, height: imageSize * 1.65, marginLeft:"22.5%" }}
+              />
+             
+            </View>
+            
+          </View>
         </TouchableOpacity>
       </View>
 
@@ -317,29 +310,39 @@ const styles = StyleSheet.create({
   },
   uploadSection: {
     alignItems: "center",
-    marginTop: 20,
-    flex: 0.4,
+    marginTop: 40,
+    marginBottom: 40,
+    flex: 1,
+    justifyContent: "center",
   },
   uploadContainer: {
     borderRadius: 20,
-    padding: 15,
+    paddingVertical: 0,
+    paddingHorizontal: 0,
+    alignItems: "center",
+    justifyContent: "center",
+    maxWidth: "95%",
+  },
+  uploadContent: {
     alignItems: "center",
     justifyContent: "center",
   },
-  uploadImage: {
-    borderRadius: 15,
-    marginBottom: 12,
+  uploadIcons: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 0,
+    gap: 24,
   },
   uploadText: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "600",
     textAlign: "center",
   },
   bottomContainer: {
     alignItems: "center",
     paddingBottom: 40,
-    flex: 0.6,
-    justifyContent: "center",
+    paddingTop: 20,
   },
   orText: {
     fontSize: 16,

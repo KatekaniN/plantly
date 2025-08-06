@@ -8,16 +8,26 @@ import {
   Share,
   Linking,
   Platform,
+  TextInput,
+  Image,
+  Modal,
 } from "react-native";
 import { PlantlyButton } from "@/components/PlantlyButton";
 import { useUserStore } from "@/store/userStore";
 import { usePlantIdentificationStore } from "@/store/plantIdentification";
+import { useUserProfileStore } from "@/store/userProfileStore";
 import { useRouter } from "expo-router";
-import { FontAwesome6, Octicons } from "@expo/vector-icons";
+import { FontAwesome, FontAwesome6, Octicons } from "@expo/vector-icons";
 import { theme } from "@/theme";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as FileSystem from "expo-file-system";
+import * as ImagePicker from "expo-image-picker";
+import * as Location from "expo-location";
+import { useState } from "react";
+import { PrivacyPolicyModal } from "@/components/PrivacyPolicyModal";
+import { TermsOfServiceModal } from "@/components/TermsOfServiceModal";
+import { RatingModal } from "@/components/RatingModal";
 
 export default function ProfileScreen() {
   const toggleHasOnboarded = useUserStore((state) => state.toggleHasOnboarded);
@@ -25,6 +35,32 @@ export default function ProfileScreen() {
   const { theme: currentTheme, themeType, setTheme, isDark } = useTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+
+  // User profile from store
+  const {
+    userProfile,
+    setName,
+    setEmail,
+    setLocation,
+    setProfileImage,
+    setExperienceLevel,
+    toggleNewsletterSubscription,
+  } = useUserProfileStore();
+
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+
+  // Modal states
+  const [emailModalVisible, setEmailModalVisible] = useState(false);
+  const [locationModalVisible, setLocationModalVisible] = useState(false);
+  const [nameModalVisible, setNameModalVisible] = useState(false);
+  const [privacyPolicyModalVisible, setPrivacyPolicyModalVisible] =
+    useState(false);
+  const [termsOfServiceModalVisible, setTermsOfServiceModalVisible] =
+    useState(false);
+  const [ratingModalVisible, setRatingModalVisible] = useState(false);
+  const [tempEmail, setTempEmail] = useState("");
+  const [tempLocation, setTempLocation] = useState("");
+  const [tempName, setTempName] = useState("");
 
   // Calculate user stats
   const totalPlants = myPlants.length;
@@ -42,7 +78,275 @@ export default function ProfileScreen() {
     return nextWateringDate <= today;
   }).length;
 
-  // Handler functions for menu items
+  const handleProfileImagePicker = async () => {
+    Alert.alert("Profile Picture", "Choose how to set your profile picture:", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Camera",
+        onPress: async () => {
+          const permission = await ImagePicker.requestCameraPermissionsAsync();
+          if (permission.granted) {
+            const result = await ImagePicker.launchCameraAsync({
+              mediaTypes: ImagePicker.MediaTypeOptions.Images,
+              allowsEditing: true,
+              aspect: [1, 1],
+              quality: 0.8,
+            });
+
+            if (!result.canceled && result.assets[0]) {
+              setProfileImage(result.assets[0].uri);
+            }
+          }
+        },
+      },
+      {
+        text: "Gallery",
+        onPress: async () => {
+          const permission =
+            await ImagePicker.requestMediaLibraryPermissionsAsync();
+          if (permission.granted) {
+            const result = await ImagePicker.launchImageLibraryAsync({
+              mediaTypes: ImagePicker.MediaTypeOptions.Images,
+              allowsEditing: true,
+              aspect: [1, 1],
+              quality: 0.8,
+            });
+
+            if (!result.canceled && result.assets[0]) {
+              setProfileImage(result.assets[0].uri);
+            }
+          }
+        },
+      },
+      {
+        text: "Remove Photo",
+        style: "destructive",
+        onPress: () => {
+          setProfileImage(null);
+        },
+      },
+    ]);
+  };
+
+  const handleEmailInput = () => {
+    setTempEmail(userProfile.email);
+    setEmailModalVisible(true);
+  };
+
+  const handleLocationInput = async () => {
+    Alert.alert(
+      "Set Location",
+      "How would you like to set your location?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Auto-Detect GPS",
+          onPress: async () => {
+            await detectGPSLocation();
+          }
+        },
+        {
+          text: "Manual Input",
+          onPress: () => {
+            setTempLocation(userProfile.location);
+            setLocationModalVisible(true);
+          }
+        }
+      ]
+    );
+  };
+
+  const detectGPSLocation = async () => {
+    try {
+      // Request location permissions
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      
+      if (status !== 'granted') {
+        Alert.alert(
+          "Permission Required",
+          "Location permission is needed to auto-detect your location.",
+          [
+            { text: "Cancel", style: "cancel" },
+            { 
+              text: "Manual Input", 
+              onPress: () => {
+                setTempLocation(userProfile.location);
+                setLocationModalVisible(true);
+              }
+            }
+          ]
+        );
+        return;
+      }
+
+      // Show loading state
+      Alert.alert("Detecting Location", "Getting your precise location...\n\nThis may take a few seconds for accuracy.");
+
+      // Get current position with high accuracy
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+        timeInterval: 10000,
+        distanceInterval: 10,
+      });
+
+      // Reverse geocode to get address
+      const reverseGeocode = await Location.reverseGeocodeAsync({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+
+      if (reverseGeocode.length > 0) {
+        const address = reverseGeocode[0];
+        const parts = [];
+        
+        // Build location string with available components
+        if (address.city) parts.push(address.city);
+        else if (address.district) parts.push(address.district);
+        else if (address.subregion) parts.push(address.subregion);
+        
+        if (address.region) parts.push(address.region);
+        else if (address.country) parts.push(address.country);
+        
+        const formattedLocation = parts.join(', ');
+        const coordinates = `${location.coords.latitude.toFixed(4)}, ${location.coords.longitude.toFixed(4)}`;
+        
+        if (formattedLocation && formattedLocation !== ', ') {
+          // Show detected location with option to confirm or edit
+          Alert.alert(
+            "Location Detected",
+            `We detected your location as:\n\n${formattedLocation}\n\nCoordinates: ${coordinates}\n\nIs this correct?`,
+            [
+              { text: "Cancel", style: "cancel" },
+              {
+                text: "Edit Location",
+                onPress: () => {
+                  setTempLocation(formattedLocation);
+                  setLocationModalVisible(true);
+                }
+              },
+              {
+                text: "Confirm",
+                onPress: () => {
+                  setLocation(formattedLocation);
+                  Alert.alert("Location Saved", `Your location has been set to: ${formattedLocation}`);
+                }
+              }
+            ]
+          );
+        } else {
+          // No readable address, offer coordinates or manual input
+          Alert.alert(
+            "Location Found",
+            `We found your GPS coordinates but couldn't determine a readable address.\n\nCoordinates: ${coordinates}\n\nWould you like to use coordinates or enter manually?`,
+            [
+              { text: "Cancel", style: "cancel" },
+              {
+                text: "Manual Input",
+                onPress: () => {
+                  setTempLocation(userProfile.location);
+                  setLocationModalVisible(true);
+                }
+              },
+              {
+                text: "Use Coordinates",
+                onPress: () => {
+                  setLocation(coordinates);
+                  Alert.alert("Location Saved", `Your location has been set to coordinates: ${coordinates}`);
+                }
+              }
+            ]
+          );
+        }
+      } else {
+        // No geocoding results
+        const coordinates = `${location.coords.latitude.toFixed(4)}, ${location.coords.longitude.toFixed(4)}`;
+        Alert.alert(
+          "GPS Found",
+          `We detected your GPS coordinates:\n\n${coordinates}\n\nBut couldn't convert to an address. Would you like to use coordinates or enter manually?`,
+          [
+            { text: "Cancel", style: "cancel" },
+            {
+              text: "Manual Input",
+              onPress: () => {
+                setTempLocation(userProfile.location);
+                setLocationModalVisible(true);
+              }
+            },
+            {
+              text: "Use Coordinates",
+              onPress: () => {
+                setLocation(coordinates);
+                Alert.alert("Location Saved", `Your location has been set to coordinates: ${coordinates}`);
+              }
+            }
+          ]
+        );
+      }
+    } catch (error) {
+      console.log("Location error:", error);
+      Alert.alert(
+        "Location Detection Failed",
+        "Unable to detect your location. This could be due to:\n\n• Poor GPS signal\n• Indoor location\n• Location services disabled\n• Network issues\n\nTry going outside for better GPS signal or enter your location manually.",
+        [
+          { text: "Cancel", style: "cancel" },
+          { text: "Retry GPS", onPress: detectGPSLocation },
+          { 
+            text: "Manual Input", 
+            onPress: () => {
+              setTempLocation(userProfile.location);
+              setLocationModalVisible(true);
+            }
+          }
+        ]
+      );
+    }
+  };
+
+  const handleNewsletterToggle = () => {
+    if (!userProfile.email || !userProfile.email.trim()) {
+      Alert.alert(
+        "Email Required",
+        "Please add your email address first to subscribe to our newsletter.",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Add Email",
+            onPress: handleEmailInput,
+          },
+        ]
+      );
+      return;
+    }
+
+    toggleNewsletterSubscription();
+
+    Alert.alert(
+      userProfile.newsletterSubscribed ? "Unsubscribed" : "Subscribed!",
+      userProfile.newsletterSubscribed
+        ? "You've been unsubscribed from our newsletter."
+        : `You'll receive plant care tips at ${userProfile.email}`
+    );
+  };
+
+  const handleExperienceLevelChange = () => {
+    const levels = ["beginner", "intermediate", "advanced", "expert"];
+    const options = levels.map((level) => ({
+      text: level.charAt(0).toUpperCase() + level.slice(1),
+      onPress: () => {
+        setExperienceLevel(level as any);
+        Alert.alert(
+          "Updated",
+          `Experience level set to: ${level.charAt(0).toUpperCase() + level.slice(1)}`
+        );
+      },
+    }));
+
+    Alert.alert("Experience Level", "Select your plant care experience:", [
+      ...options,
+      { text: "Cancel", style: "cancel" },
+    ]);
+  };
+
   const handleExportData = async () => {
     try {
       const exportData = {
@@ -179,46 +483,15 @@ Best regards,
   };
 
   const handleRateApp = async () => {
-    try {
-      await Share.share({
-        message: "Check out Plantly - the best plant care app! 🌱",
-        title: "Plantly App",
-      });
-    } catch (error) {
-      Alert.alert(
-        "Rate Plantly",
-        "Thank you for wanting to rate our app! This feature will direct you to the app store.",
-        [{ text: "OK" }]
-      );
-    }
+    setRatingModalVisible(true);
   };
 
   const handleTermsOfService = () => {
-    Alert.alert(
-      "Terms of Service",
-      "This will open the Terms of Service in your browser.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Open",
-          onPress: () => Linking.openURL("https://plantly.app/terms"),
-        },
-      ]
-    );
+    setTermsOfServiceModalVisible(true);
   };
 
   const handlePrivacyPolicy = () => {
-    Alert.alert(
-      "Privacy Policy",
-      "This will open the Privacy Policy in your browser.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Open",
-          onPress: () => Linking.openURL("https://plantly.app/privacy"),
-        },
-      ]
-    );
+    setPrivacyPolicyModalVisible(true);
   };
 
   const handleThemeChange = () => {
@@ -308,29 +581,64 @@ Best regards,
           { backgroundColor: currentTheme.colorBackground },
         ]}
       >
-        <View
+        <TouchableOpacity
           style={[
             styles.profileIcon,
             { backgroundColor: currentTheme.colorSurface },
           ]}
+          onPress={handleProfileImagePicker}
         >
-          <FontAwesome6
-            name="user"
-            size={32}
-            color={currentTheme.colorLeafyGreen}
-          />
-        </View>
-        <Text style={[styles.headerTitle, { color: currentTheme.colorText }]}>
-          My Profile
-        </Text>
+          {userProfile.profileImage ? (
+            <Image
+              source={{ uri: userProfile.profileImage }}
+              style={styles.profileImage}
+            />
+          ) : (
+            <FontAwesome6
+              name="user"
+              size={32}
+              color={currentTheme.colorLeafyGreen}
+            />
+          )}
+          <View
+            style={[
+              styles.editProfileBadge,
+              { backgroundColor: currentTheme.colorLeafyGreen },
+            ]}
+          >
+            <FontAwesome6 name="camera" size={12} color="white" />
+          </View>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => setNameModalVisible(true)}>
+          <Text style={[styles.headerTitle, { color: currentTheme.colorText }]}>
+            {userProfile.name || "Tap to add name"}
+          </Text>
+        </TouchableOpacity>
         <Text
           style={[
             styles.headerSubtitle,
             { color: currentTheme.colorTextSecondary },
           ]}
         >
-          Plant Care Dashboard
+          {userProfile.experienceLevel.charAt(0).toUpperCase() +
+            userProfile.experienceLevel.slice(1)}{" "}
+          Plant Parent
+          {userProfile.location && ` • ${userProfile.location}`}
         </Text>
+        {userProfile.email && (
+          <Text
+            style={[
+              styles.headerSubtitle,
+              {
+                color: currentTheme.colorLeafyGreen,
+                fontSize: 14,
+                marginTop: 4,
+              },
+            ]}
+          >
+            📧 {userProfile.email}
+          </Text>
+        )}
       </View>
 
       {/* Stats Section */}
@@ -430,6 +738,248 @@ Best regards,
         </View>
       </View>
 
+      {/* Personal Information Section */}
+      <View style={styles.section}>
+        <Text style={[styles.sectionTitle, { color: currentTheme.colorText }]}>
+          Personal Information
+        </Text>
+
+        <TouchableOpacity
+          style={[
+            styles.menuItem,
+            {
+              backgroundColor: currentTheme.colorSurface,
+              borderColor: currentTheme.colorBorder,
+            },
+          ]}
+          onPress={() => setNameModalVisible(true)}
+        >
+          <View style={styles.menuItemLeft}>
+            <FontAwesome6
+              name="user"
+              size={20}
+              color={currentTheme.colorLeafyGreen}
+            />
+            <View style={styles.menuItemText}>
+              <Text
+                style={[
+                  styles.menuItemTitle,
+                  { color: currentTheme.colorText },
+                ]}
+              >
+                Full Name
+              </Text>
+              <Text
+                style={[
+                  styles.menuItemSubtitle,
+                  { color: currentTheme.colorTextSecondary },
+                ]}
+              >
+                {userProfile.name || "Tap to add your name"}
+              </Text>
+            </View>
+          </View>
+          <FontAwesome6
+            name="chevron-right"
+            size={16}
+            color={currentTheme.colorTextSecondary}
+          />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.menuItem,
+            {
+              backgroundColor: currentTheme.colorSurface,
+              borderColor: currentTheme.colorBorder,
+            },
+          ]}
+          onPress={handleEmailInput}
+        >
+          <View style={styles.menuItemLeft}>
+            <FontAwesome6
+              name="envelope"
+              size={20}
+              color={currentTheme.colorLeafyGreen}
+            />
+            <View style={styles.menuItemText}>
+              <Text
+                style={[
+                  styles.menuItemTitle,
+                  { color: currentTheme.colorText },
+                ]}
+              >
+                Email Address
+              </Text>
+              <Text
+                style={[
+                  styles.menuItemSubtitle,
+                  { color: currentTheme.colorTextSecondary },
+                ]}
+              >
+                {userProfile.email || "Add email for newsletters"}
+              </Text>
+            </View>
+          </View>
+          <FontAwesome6
+            name="chevron-right"
+            size={16}
+            color={currentTheme.colorTextSecondary}
+          />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.menuItem,
+            {
+              backgroundColor: currentTheme.colorSurface,
+              borderColor: currentTheme.colorBorder,
+            },
+          ]}
+          onPress={handleLocationInput}
+        >
+          <View style={styles.menuItemLeft}>
+            <FontAwesome6
+              name="location-dot"
+              size={20}
+              color={currentTheme.colorLeafyGreen}
+            />
+            <View style={styles.menuItemText}>
+              <Text
+                style={[
+                  styles.menuItemTitle,
+                  { color: currentTheme.colorText },
+                ]}
+              >
+                Location
+              </Text>
+              <Text
+                style={[
+                  styles.menuItemSubtitle,
+                  { color: currentTheme.colorTextSecondary },
+                ]}
+              >
+                {userProfile.location || "Set your location"}
+              </Text>
+            </View>
+          </View>
+          <FontAwesome6
+            name="chevron-right"
+            size={16}
+            color={currentTheme.colorTextSecondary}
+          />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.menuItem,
+            {
+              backgroundColor: currentTheme.colorSurface,
+              borderColor: currentTheme.colorBorder,
+            },
+          ]}
+          onPress={handleExperienceLevelChange}
+        >
+          <View style={styles.menuItemLeft}>
+            <FontAwesome6
+              name="star"
+              size={20}
+              color={currentTheme.colorLeafyGreen}
+            />
+            <View style={styles.menuItemText}>
+              <Text
+                style={[
+                  styles.menuItemTitle,
+                  { color: currentTheme.colorText },
+                ]}
+              >
+                Experience Level
+              </Text>
+              <Text
+                style={[
+                  styles.menuItemSubtitle,
+                  { color: currentTheme.colorTextSecondary },
+                ]}
+              >
+                {userProfile.experienceLevel.charAt(0).toUpperCase() +
+                  userProfile.experienceLevel.slice(1)}
+              </Text>
+            </View>
+          </View>
+          <FontAwesome6
+            name="chevron-right"
+            size={16}
+            color={currentTheme.colorTextSecondary}
+          />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.menuItem,
+            {
+              backgroundColor: currentTheme.colorSurface,
+              borderColor: currentTheme.colorBorder,
+            },
+          ]}
+          onPress={handleNewsletterToggle}
+        >
+          <View style={styles.menuItemLeft}>
+            <FontAwesome6
+              name="bell"
+              size={20}
+              color={currentTheme.colorLeafyGreen}
+            />
+            <View style={styles.menuItemText}>
+              <Text
+                style={[
+                  styles.menuItemTitle,
+                  { color: currentTheme.colorText },
+                ]}
+              >
+                Newsletter Subscription
+              </Text>
+              <Text
+                style={[
+                  styles.menuItemSubtitle,
+                  { color: currentTheme.colorTextSecondary },
+                ]}
+              >
+                {userProfile.email
+                  ? userProfile.newsletterSubscribed
+                    ? `Subscribed • ${userProfile.email}`
+                    : "Subscribe to get plant care tips"
+                  : "Add email to subscribe to newsletter"}
+              </Text>
+            </View>
+          </View>
+          <View
+            style={[
+              styles.toggleIndicator,
+              {
+                backgroundColor:
+                  userProfile.email && userProfile.newsletterSubscribed
+                    ? currentTheme.colorLeafyGreen
+                    : !userProfile.email
+                      ? currentTheme.colorTextSecondary
+                      : currentTheme.colorBorder,
+              },
+            ]}
+          >
+            <FontAwesome
+              name={
+                !userProfile.email
+                  ? "envelope-o"
+                  : userProfile.newsletterSubscribed
+                    ? "check"
+                    : "times"
+              }
+              size={12}
+              color="white"
+            />
+          </View>
+        </TouchableOpacity>
+      </View>
+
       {/* Settings Section */}
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: currentTheme.colorText }]}>
@@ -525,7 +1075,7 @@ Best regards,
           />
         </TouchableOpacity>
 
-        <TouchableOpacity
+        {/*<TouchableOpacity
           style={[
             styles.menuItem,
             {
@@ -565,7 +1115,7 @@ Best regards,
             size={16}
             color={currentTheme.colorTextSecondary}
           />
-        </TouchableOpacity>
+        </TouchableOpacity>*/}
       </View>
 
       {/* Data & Privacy Section */}
@@ -616,7 +1166,7 @@ Best regards,
           />
         </TouchableOpacity>
 
-        <TouchableOpacity
+        {/*<TouchableOpacity
           style={[
             styles.menuItem,
             {
@@ -656,7 +1206,7 @@ Best regards,
             size={16}
             color={currentTheme.colorTextSecondary}
           />
-        </TouchableOpacity>
+        </TouchableOpacity>*/}
 
         <TouchableOpacity
           style={[
@@ -707,7 +1257,7 @@ Best regards,
           Help & Support
         </Text>
 
-        <TouchableOpacity
+        {/*<TouchableOpacity
           style={[
             styles.menuItem,
             {
@@ -747,7 +1297,7 @@ Best regards,
             size={16}
             color={currentTheme.colorTextSecondary}
           />
-        </TouchableOpacity>
+        </TouchableOpacity>*/}
 
         <TouchableOpacity
           style={[
@@ -1010,6 +1560,251 @@ Best regards,
       </View>
 
       <View style={styles.bottomSpacing} />
+
+      {/* Name Modal */}
+      <Modal
+        visible={nameModalVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
+        <View
+          style={[
+            styles.modalContainer,
+            { backgroundColor: currentTheme.colorBackground },
+          ]}
+        >
+          <View
+            style={[
+              styles.modalHeader,
+              { borderBottomColor: currentTheme.colorBorder },
+            ]}
+          >
+            <TouchableOpacity
+              onPress={() => {
+                setNameModalVisible(false);
+                setTempName("");
+              }}
+            >
+              <Text
+                style={[
+                  styles.modalButton,
+                  { color: currentTheme.colorTextSecondary },
+                ]}
+              >
+                Cancel
+              </Text>
+            </TouchableOpacity>
+            <Text
+              style={[styles.modalTitle, { color: currentTheme.colorText }]}
+            >
+              Edit Name
+            </Text>
+            <TouchableOpacity
+              onPress={() => {
+                setName(tempName);
+                setNameModalVisible(false);
+                setTempName("");
+              }}
+            >
+              <Text
+                style={[
+                  styles.modalButton,
+                  { color: currentTheme.colorLeafyGreen },
+                ]}
+              >
+                Save
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.modalContent}>
+            <TextInput
+              style={[
+                styles.modalInput,
+                {
+                  backgroundColor: currentTheme.colorSurface,
+                  borderColor: currentTheme.colorBorder,
+                  color: currentTheme.colorText,
+                },
+              ]}
+              value={tempName}
+              onChangeText={setTempName}
+              placeholder="Enter your full name"
+              placeholderTextColor={currentTheme.colorTextSecondary}
+              autoFocus
+            />
+          </View>
+        </View>
+      </Modal>
+
+      {/* Email Modal */}
+      <Modal
+        visible={emailModalVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
+        <View
+          style={[
+            styles.modalContainer,
+            { backgroundColor: currentTheme.colorBackground },
+          ]}
+        >
+          <View
+            style={[
+              styles.modalHeader,
+              { borderBottomColor: currentTheme.colorBorder },
+            ]}
+          >
+            <TouchableOpacity
+              onPress={() => {
+                setEmailModalVisible(false);
+                setTempEmail("");
+              }}
+            >
+              <Text
+                style={[
+                  styles.modalButton,
+                  { color: currentTheme.colorTextSecondary },
+                ]}
+              >
+                Cancel
+              </Text>
+            </TouchableOpacity>
+            <Text
+              style={[styles.modalTitle, { color: currentTheme.colorText }]}
+            >
+              Edit Email
+            </Text>
+            <TouchableOpacity
+              onPress={() => {
+                setEmail(tempEmail);
+                setEmailModalVisible(false);
+                setTempEmail("");
+              }}
+            >
+              <Text
+                style={[
+                  styles.modalButton,
+                  { color: currentTheme.colorLeafyGreen },
+                ]}
+              >
+                Save
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.modalContent}>
+            <TextInput
+              style={[
+                styles.modalInput,
+                {
+                  backgroundColor: currentTheme.colorSurface,
+                  borderColor: currentTheme.colorBorder,
+                  color: currentTheme.colorText,
+                },
+              ]}
+              value={tempEmail}
+              onChangeText={setTempEmail}
+              placeholder="Enter your email address"
+              placeholderTextColor={currentTheme.colorTextSecondary}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoFocus
+            />
+          </View>
+        </View>
+      </Modal>
+
+      {/* Location Modal */}
+      <Modal
+        visible={locationModalVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
+        <View
+          style={[
+            styles.modalContainer,
+            { backgroundColor: currentTheme.colorBackground },
+          ]}
+        >
+          <View
+            style={[
+              styles.modalHeader,
+              { borderBottomColor: currentTheme.colorBorder },
+            ]}
+          >
+            <TouchableOpacity
+              onPress={() => {
+                setLocationModalVisible(false);
+                setTempLocation("");
+              }}
+            >
+              <Text
+                style={[
+                  styles.modalButton,
+                  { color: currentTheme.colorTextSecondary },
+                ]}
+              >
+                Cancel
+              </Text>
+            </TouchableOpacity>
+            <Text
+              style={[styles.modalTitle, { color: currentTheme.colorText }]}
+            >
+              Edit Location
+            </Text>
+            <TouchableOpacity
+              onPress={() => {
+                setLocation(tempLocation);
+                setLocationModalVisible(false);
+                setTempLocation("");
+              }}
+            >
+              <Text
+                style={[
+                  styles.modalButton,
+                  { color: currentTheme.colorLeafyGreen },
+                ]}
+              >
+                Save
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.modalContent}>
+            <TextInput
+              style={[
+                styles.modalInput,
+                {
+                  backgroundColor: currentTheme.colorSurface,
+                  borderColor: currentTheme.colorBorder,
+                  color: currentTheme.colorText,
+                },
+              ]}
+              value={tempLocation}
+              onChangeText={setTempLocation}
+              placeholder="Enter your location"
+              placeholderTextColor={currentTheme.colorTextSecondary}
+              autoFocus
+            />
+          </View>
+        </View>
+      </Modal>
+
+      {/* Privacy Policy Modal */}
+      <PrivacyPolicyModal
+        visible={privacyPolicyModalVisible}
+        onClose={() => setPrivacyPolicyModalVisible(false)}
+      />
+
+      {/* Terms of Service Modal */}
+      <TermsOfServiceModal
+        visible={termsOfServiceModalVisible}
+        onClose={() => setTermsOfServiceModalVisible(false)}
+      />
+
+      {/* Rating Modal */}
+      <RatingModal
+        visible={ratingModalVisible}
+        onClose={() => setRatingModalVisible(false)}
+      />
     </ScrollView>
   );
 }
@@ -1027,12 +1822,28 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   profileIcon: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 16,
+    position: "relative",
+  },
+  profileImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+  },
+  editProfileBadge: {
+    position: "absolute",
+    bottom: 7,
+    right: 44,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
   },
   headerTitle: {
     fontSize: 28,
@@ -1112,5 +1923,39 @@ const styles = StyleSheet.create({
   },
   buttonSpacing: {
     height: 16,
+  },
+  toggleIndicator: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalContainer: {
+    flex: 1,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 16,
+    borderBottomWidth: 1,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  modalButton: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  modalContent: {
+    padding: 20,
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
   },
 });

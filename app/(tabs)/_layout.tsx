@@ -6,6 +6,7 @@ import Entypo from "@expo/vector-icons/Entypo";
 import { useUserStore } from "@/store/userStore";
 import { TouchableOpacity } from "react-native";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 
 export default function Layout() {
   const hasFinishedOnboarding = useUserStore(
@@ -52,9 +53,20 @@ export default function Layout() {
         }}
       ></Tabs.Screen>
       <Tabs.Screen
+        name="plant-care-guide"
+        options={{
+          title: "Care Guide",
+          headerShown: false,
+          tabBarIcon: ({ size, color }) => (
+            <FontAwesome6 name="book-open" size={size} color={color} />
+          ),
+        }}
+      ></Tabs.Screen>
+      <Tabs.Screen
         name="profile"
         options={{
           title: "Profile",
+          headerShown: false,
           tabBarIcon: ({ size, color }) => (
             <MaterialIcons name="account-circle" size={size} color={color} />
           ),
