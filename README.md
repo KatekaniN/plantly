@@ -34,7 +34,7 @@ To get a local copy up and running, follow these simple steps.
 
 1. Clone the repo
    ```sh
-   git clone https://github.com/your_username/plantly.git
+   git clone https://github.com/KatekaniN/plantly.git
    ```
 2. Install NPM packages
    ```sh
@@ -70,6 +70,6 @@ To get a local copy up and running, follow these simple steps.
 ├── contexts/             # React contexts for managing global state
 ├── services/             # Services for interacting with external APIs
 ├── store/                # Zustand store for state management
-├── theme.ts              # Theme configuration (colors, fonts, etc.)
+├── theme.ts              # Theme configuration (colours, fonts, etc.)
 └── ...
 ```
